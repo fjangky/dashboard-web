@@ -41,8 +41,9 @@
         .icon-sys-header { color: #38bdf8; }
         .icon-docker-header { color: #2563eb; }
 
+        /* --- PERBAIKAN UTAMA: Layout Grid untuk 3 Elemen di Bawah --- */
         .services-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; width: 100%; }
-        @media (max-width: 1100px) { .services-wrapper { grid-template-columns: 1fr; } }
+        .file-manager-wrapper { grid-column: span 2; margin-top: 10px; background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; }
 
         .monitor-section { width: 100%; display: flex; flex-direction: column; gap: 15px; }
         .monitor-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid #1f2937; padding-bottom: 8px; }
@@ -54,7 +55,6 @@
         .server-blade:hover { background: #2563eb0a; border-color: rgba(37, 99, 235, 0.2); }
         
         .blade-left { display: flex; align-items: center; gap: 14px; width: 60%; }
-        
         .led { width: 9px; height: 9px; border-radius: 50%; }
         .led-active { background: #00ffcc; box-shadow: 0 0 8px rgba(0, 255, 204, 0.6); animation: pulseLed 2s infinite ease-in-out; }
         .led-offline { background: #f87171; box-shadow: 0 0 8px rgba(248, 113, 113, 0.5); }
@@ -103,78 +103,54 @@
             filter: drop-shadow(0 0 8px rgba(0, 255, 204, 0.6));
         }
 
+        .file-manager-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .file-manager-header h2 { font-size: 15px; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px; }
+        .iframe-container { width: 100%; height: 500px; border-radius: 8px; overflow: hidden; border: 1px solid #1f2937; }
+
+        @media (max-width: 1100px) { 
+            .services-wrapper { grid-template-columns: 1fr; } 
+            .file-manager-wrapper { grid-column: span 1; }
+        }
+
         @media (max-width: 960px) { .main-layout { grid-template-columns: 1fr; } }
         
-        /* --- OPTIMALISASI SEPENUHNYA UNTUK HANDPHONE (MEDIA QUERY LAYAR KECIL) --- */
+        /* --- OPTIMALISASI SEPENUHNYA UNTUK HANDPHONE --- */
         @media (max-width: 640px) {
             body { padding: 12px; gap: 15px; }
             .app-container { gap: 15px; }
             
-            /* Susunan Atas (Header & Tombol) */
             .header { flex-direction: column; align-items: flex-start; gap: 12px; padding-bottom: 15px; }
             .logo { font-size: 18px; width: 100%; justify-content: space-between; }
             .settings-btn { width: 100%; justify-content: center; padding: 12px; }
 
-            /* Grafik Fleksibel */
             .main-layout { grid-template-columns: 1fr; gap: 15px; }
             .chart-container { padding: 16px; }
             canvas { height: 180px !important; }
 
-            /* Grid Indikator Status - Dibagi 2 Kolom Agar Ringkas */
             .status-sidebar { grid-template-columns: repeat(2, 1fr); gap: 12px; }
             #card-disk { grid-column: span 2; }
             .card { padding: 16px; }
             .card h3 { font-size: 11px; margin-bottom: 8px; }
             .card .value { font-size: 24px; }
 
-            /* List Layanan & Header Rak */
             .monitor-header { gap: 10px; }
             .monitor-header h2 { flex-shrink: 1; font-size: 13px; }
             
-            /* Optimasi Khusus Tombol Bersihkan Kontainer di Mobile (Hanya Ikon) */
             #btn-purge { padding: 8px 10px; font-size: 0; flex-shrink: 0; }
             #btn-purge i { font-size: 14px; margin: 0; }
 
-            /* Docker & System Blade Container */
             .server-blade { padding: 12px; flex-wrap: wrap; gap: 8px; }
             .blade-left { width: 100%; }
             .blade-details h4 { font-size: 13px; }
             .blade-network { width: auto; text-align: left; justify-content: flex-start; font-size: 11px; color: #9ca3af; }
             .blade-status-text { margin-left: auto; }
 
-            /* Jendela Pengaturan */
             .modal { padding: 20px; width: 95%; }
             .modal-header h2 { font-size: 16px; }
             .toggle-group { font-size: 13px; }
-        }
-        .file-manager-wrapper {
-            margin-top: 25px;
-            background: #111827;
-            border: 1px solid #1f2937;
-            border-radius: 12px;
-            padding: 24px;
-        }
-        .file-manager-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .file-manager-header h2 {
-            font-size: 15px;
-            color: #ffffff;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .iframe-container {
-            width: 100%;
-            height: 500px;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #1f2937;
+
+            .file-manager-wrapper { padding: 16px; }
+            .iframe-container { height: 350px; } /* Memperkecil tinggi iframe di mobile agar pas */
         }
     </style>
 </head>
@@ -208,6 +184,15 @@
             </div>
             <div class="monitor-rack" id="system-services-container"></div>
         </div>
+
+        <div class="monitor-section">
+            <div class="monitor-header">
+                <h2 id="txt-docker-title"><i class="fa-solid fa-box-archive icon-docker-header"></i> Kontainer Docker <span id="docker-count">(0)</span></h2>
+                <button class="btn prune-btn" id="btn-purge" onclick="pruneContainers()"><i class="fa-solid fa-broom"></i> Bersihkan Kontainer Mati</button>
+            </div>
+            <div class="monitor-rack" id="docker-services-container"></div>
+        </div>
+
         <div class="file-manager-wrapper">
             <div class="file-manager-header">
                 <h2><i class="fa-solid fa-folder-open" style="color: #f59e0b;"></i> File Manager</h2>
@@ -218,14 +203,6 @@
             <div class="iframe-container">
                 <iframe src="http://192.168.18.10:8080" style="width: 100%; height: 100%; border: none;"></iframe>
             </div>
-        </div>
-
-        <div class="monitor-section">
-            <div class="monitor-header">
-                <h2 id="txt-docker-title"><i class="fa-solid fa-box-archive icon-docker-header"></i> Kontainer Docker <span id="docker-count">(0)</span></h2>
-                <button class="btn prune-btn" id="btn-purge" onclick="pruneContainers()"><i class="fa-solid fa-broom"></i> Bersihkan Kontainer Mati</button>
-            </div>
-            <div class="monitor-rack" id="docker-services-container"></div>
         </div>
     </div>
 
