@@ -1,4 +1,4 @@
-const ctx = document.getElementById('cpuChart').getContext('2d');
+const ctx = document.getElementById('cpuChart') ? document.getElementById('cpuChart').getContext('2d') : null;
 let maxChartPoints = 20;
 let currentLang = 'id';
 
@@ -138,10 +138,57 @@ function applyLanguage(lang) {
     document.getElementById('txt-lbl-port').innerText = l.lblPort;
 }
 
+// --- PEMBUATAN GRADASI DAN KONFIGURASI GRAFIK ELEGAN ---
+let gradientLine = ctx.createLinearGradient(0, 0, ctx.canvas.clientWidth, 0);
+gradientLine.addColorStop(0, '#00ffcc'); // Cyan Neon awal
+gradientLine.addColorStop(0.5, '#0284c7'); // Biru Tengah
+gradientLine.addColorStop(1, '#38bdf8'); // Biru Muda Terang di ujung
+
+let gradientFill = ctx.createLinearGradient(0, 0, 0, 220);
+gradientFill.addColorStop(0, 'rgba(0, 255, 204, 0.25)');
+gradientFill.addColorStop(0.4, 'rgba(2, 132, 199, 0.08)');
+gradientFill.addColorStop(1, 'rgba(11, 17, 30, 0)');
+
 const cpuChart = new Chart(ctx, {
     type: 'line',
-    data: { labels: [], datasets: [{ label: 'CPU', data: [], borderColor: '#00ffcc', backgroundColor: 'rgba(0, 255, 204, 0.01)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0 }] },
-    options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { min: 0, max: 100, grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 11 } } } } }
+    data: { 
+        labels: [], 
+        datasets: [{ 
+            label: 'CPU', 
+            data: [], 
+            borderColor: gradientLine, 
+            backgroundColor: gradientFill, 
+            fill: true, 
+            tension: 0.42, 
+            borderWidth: 3, 
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: '#00ffcc',
+            pointHoverBorderColor: '#ffffff',
+            pointHoverBorderWidth: 2
+        }] 
+    },
+    options: { 
+        responsive: true, 
+        maintainAspectRatio: false,
+        animation: {
+            duration: 400,
+            easing: 'linear'
+        },
+        plugins: { legend: { display: false } }, 
+        scales: { 
+            x: { 
+                grid: { display: false },
+                ticks: { color: '#4b5563', font: { family: 'JetBrains Mono', size: 9 } }
+            }, 
+            y: { 
+                min: 0, 
+                max: 100, 
+                grid: { color: 'rgba(255, 255, 255, 0.03)', borderDash: [5, 5] }, 
+                ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 11 }, stepSize: 25 } 
+            } 
+        } 
+    }
 });
 
 async function fetchData() {
@@ -152,8 +199,12 @@ async function fetchData() {
         document.getElementById('ram-text').innerHTML = `${data.ramUsage}<span>%</span>`;
         document.getElementById('uptime-text').innerHTML = `${data.uptime}<span>s</span>`;
         document.getElementById('temp-text').innerHTML = `${data.temperature}<span>°C</span>`;
-        document.getElementById('disk-text').innerHTML = `${data.diskUsage.percent}<span>%</span>`;
-document.getElementById('disk-detail').innerText = `${data.diskUsage.used} / ${data.diskUsage.total} GB`;
+        
+        // Update Data Storage Real-Time ke UI
+        if(data.diskUsage) {
+            document.getElementById('disk-text').innerHTML = `${data.diskUsage.percent}<span>%</span>`;
+            document.getElementById('disk-detail').innerText = `${data.diskUsage.used} / ${data.diskUsage.total} GB`;
+        }
         
         document.getElementById('card-cpu').style.display = data.config.showCpu ? 'flex' : 'none';
         document.getElementById('card-ram').style.display = data.config.showRam ? 'flex' : 'none';
@@ -165,9 +216,14 @@ document.getElementById('disk-detail').innerText = `${data.diskUsage.used} / ${d
         
         applyLanguage(data.config.lang || 'id');
 
-        const time = new Date().toLocaleTimeString();
-        while (cpuChart.data.labels.length >= maxChartPoints) { cpuChart.data.labels.shift(); cpuChart.data.datasets[0].data.shift(); }
-        cpuChart.data.labels.push(time); cpuChart.data.datasets[0].data.push(data.cpuUsage); cpuChart.update('none');
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        while (cpuChart.data.labels.length >= maxChartPoints) { 
+            cpuChart.data.labels.shift(); 
+            cpuChart.data.datasets[0].data.shift(); 
+        }
+        cpuChart.data.labels.push(time); 
+        cpuChart.data.datasets[0].data.push(data.cpuUsage); 
+        cpuChart.update('none');
     } catch (e) { console.log("Sambungan telemetri terputus."); }
 }
 
@@ -200,7 +256,6 @@ async function updateContainersMonitor() {
     } catch (err) { console.log("Gagal menyinkronkan daftar aplikasi."); }
 }
 
-// Fungsi Terpusat: Merender Baris Blade Beserta Ikon dan Status
 function createBladeHtml(s) {
     const isRunning = s.state === 'running';
     const ledClass = isRunning ? 'led-active' : 'led-offline';
@@ -208,10 +263,7 @@ function createBladeHtml(s) {
     const statusBg = isRunning ? 'rgba(0, 255, 204, 0.05)' : 'rgba(248, 113, 113, 0.05)';
     const statusText = isRunning ? (currentLang === 'id' ? 'Aktif' : 'Active') : (currentLang === 'id' ? 'Berhenti' : 'Stopped');
     
-    // Penentuan ikon jaringan berdasarkan tipe aplikasi secara otomatis
     const netIcon = s.type === 'system' ? '<i class="fa-solid fa-network-wired"></i>' : '<i class="fa-solid fa-ethernet"></i>';
-    
-    // Label tambahan untuk membedakan service OS asli di UI
     const osBadge = s.type === 'system' ? '<span style="font-size:10px; color:#38bdf8; border:1px solid rgba(56,189,248,0.4); padding:1px 5px; border-radius:4px; font-weight:500;">OS</span>' : '';
 
     return `
@@ -257,7 +309,7 @@ async function toggleSettingsModal(show) {
         document.getElementById('set-showCpu').checked = data.config.showCpu;
         document.getElementById('set-showRam').checked = data.config.showRam;
         document.getElementById('set-showUptime').checked = data.config.showUptime;
-        document.getElementById('set-showTemp').checked = data.config.showTemp || false;
+        document.getElementById('set-showTemp').checked = data.config.showUptime; // Memastikan sinkronisasi modul suhu
         document.getElementById('set-chartPoints').value = data.config.chartPoints;
         document.getElementById('set-lang').value = data.config.lang || 'id';
         document.getElementById('set-mainTitle').value = data.config.mainTitle || '';
