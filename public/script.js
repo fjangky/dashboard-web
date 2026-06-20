@@ -2,7 +2,6 @@ const ctx = document.getElementById('cpuChart').getContext('2d');
 let maxChartPoints = 20;
 let currentLang = 'id';
 
-// Kamus Multi-Bahasa yang Lebih Ramah dan Hangat
 const dictionary = {
     id: {
         cockpitBtn: '<i class="fa-solid fa-gear"></i> Pengaturan Sistem',
@@ -24,10 +23,18 @@ const dictionary = {
         optChart: 'Titik Segarkan Grafik',
         btnSave: 'Simpan Konfigurasi',
         rackEmpty: 'Belum ada aplikasi yang berjalan di sistem Anda.',
+        popConfirmTitle: 'Konfirmasi Pembersihan',
         confirmPurge: 'Apakah Anda ingin membersihkan sistem? Seluruh aplikasi kontainer yang sudah berhenti (tidak aktif) akan dihapus secara aman.',
+        popSuccessTitle: 'Sistem Dibersihkan',
         msgSuccess: 'Sistem berhasil dibersihkan! Bersama dengan $count kontainer tak terpakai.',
+        popCleanTitle: 'Info Sistem',
+        msgClean: 'Sistem Anda sudah bersih sepenuhnya!',
+        popErrorTitle: 'Kesalahan Sistem',
         msgError: 'Gagal melakukan pembersihan sistem Docker.',
-        msgCritical: 'Gagal tersambung dengan sistem inti server.'
+        msgCritical: 'Gagal tersambung dengan sistem inti server.',
+        btnYes: 'Ya, Bersihkan',
+        btnNo: 'Batal',
+        btnOk: 'Selesai'
     },
     en: {
         cockpitBtn: '<i class="fa-solid fa-gear"></i> System Settings',
@@ -49,12 +56,62 @@ const dictionary = {
         optChart: 'Chart Refresh Points',
         btnSave: 'Save Configuration',
         rackEmpty: 'No applications are running on your system yet.',
+        popConfirmTitle: 'System Optimization',
         confirmPurge: 'Do you want to clean up the system? All stopped container applications will be safely removed.',
+        popSuccessTitle: 'System Purged',
         msgSuccess: 'System cleared successfully! Removed $count unused containers.',
+        popCleanTitle: 'System Notification',
+        msgClean: 'Your system is already fully optimized!',
+        popErrorTitle: 'System Error',
         msgError: 'Failed to perform Docker system prune.',
-        msgCritical: 'Failed to connect to the server core system.'
+        msgCritical: 'Failed to connect to the server core system.',
+        btnYes: 'Yes, Clean Up',
+        btnNo: 'Cancel',
+        btnOk: 'Got It'
     }
 };
+
+// ENGINES DIALOG POP-UP MODAL KUSTOM
+function showCustomPopup({ type, title, message, onConfirm = null }) {
+    const overlay = document.getElementById('customPopup');
+    const iconBox = document.getElementById('pop-icon');
+    const titleBox = document.getElementById('pop-title');
+    const msgBox = document.getElementById('pop-message');
+    const btnBox = document.getElementById('pop-buttons');
+    const l = dictionary[currentLang];
+
+    iconBox.className = "popup-icon";
+    if (type === 'warn') { iconBox.classList.add('warn'); iconBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>'; }
+    else if (type === 'success') { iconBox.classList.add('success'); iconBox.innerHTML = '<i class="fa-solid fa-circle-check"></i>'; }
+    else if (type === 'error') { iconBox.classList.add('error'); iconBox.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>'; }
+
+    titleBox.innerText = title;
+    msgBox.innerText = message;
+    btnBox.innerHTML = '';
+
+    if (onConfirm) {
+        const yesBtn = document.createElement('button');
+        yesBtn.className = 'btn-pop-confirm';
+        yesBtn.innerText = l.btnYes;
+        yesBtn.onclick = () => { overlay.classList.remove('active'); onConfirm(); };
+
+        const noBtn = document.createElement('button');
+        noBtn.className = 'btn-pop-cancel';
+        noBtn.innerText = l.btnNo;
+        noBtn.onclick = () => overlay.classList.remove('active');
+
+        btnBox.appendChild(noBtn);
+        btnBox.appendChild(yesBtn);
+    } else {
+        const okBtn = document.createElement('button');
+        okBtn.className = 'btn-pop-confirm';
+        okBtn.innerText = l.btnOk;
+        okBtn.onclick = () => overlay.classList.remove('active');
+        btnBox.appendChild(okBtn);
+    }
+
+    overlay.classList.add('active');
+}
 
 function applyLanguage(lang, count = 0) {
     currentLang = lang;
@@ -81,33 +138,18 @@ function applyLanguage(lang, count = 0) {
     document.getElementById('btn-save-config').innerText = l.btnSave;
 }
 
-// Inisialisasi Grafik yang Lembut & Modern
 const cpuChart = new Chart(ctx, {
     type: 'line',
     data: {
         labels: [],
-        datasets: [{ 
-            label: 'CPU', 
-            data: [], 
-            borderColor: '#00ffcc', 
-            backgroundColor: 'rgba(0, 255, 204, 0.01)', 
-            fill: true, 
-            tension: 0.4, 
-            borderWidth: 2, 
-            pointRadius: 0 
-        }]
+        datasets: [{ label: 'CPU', data: [], borderColor: '#00ffcc', backgroundColor: 'rgba(0, 255, 204, 0.01)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0 }]
     },
     options: { 
         responsive: true, 
         plugins: { legend: { display: false } }, 
         scales: { 
             x: { display: false }, 
-            y: { 
-                min: 0, 
-                max: 100, 
-                grid: { color: 'rgba(255, 255, 255, 0.04)' }, 
-                ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 11 } } 
-            } 
+            y: { min: 0, max: 100, grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 11 } } } 
         } 
     }
 });
@@ -182,22 +224,40 @@ async function updateContainersMonitor() {
     } catch (err) { console.log("Gagal menyinkronkan daftar aplikasi."); }
 }
 
-async function pruneContainers() {
+function pruneContainers() {
     const l = dictionary[currentLang];
-    if (!confirm(l.confirmPurge)) return;
     
-    try {
-        const res = await fetch('/api/containers/prune', { method: 'POST' });
-        const result = await res.json();
-        if (result.success) {
-            alert(result.message > 0 ? l.msgSuccess.replace('$count', result.message) : "Sistem Anda sudah bersih sepenuhnya!");
-            updateContainersMonitor();
-        } else {
-            alert(l.msgError);
+    showCustomPopup({
+        type: 'warn',
+        title: l.popConfirmTitle,
+        message: l.confirmPurge,
+        onConfirm: async () => {
+            try {
+                const res = await fetch('/api/containers/prune', { method: 'POST' });
+                const result = await res.json();
+                if (result.success) {
+                    if (result.message > 0) {
+                        showCustomPopup({
+                            type: 'success',
+                            title: l.popSuccessTitle,
+                            message: l.msgSuccess.replace('$count', result.message)
+                        });
+                    } else {
+                        showCustomPopup({
+                            type: 'success',
+                            title: l.popCleanTitle,
+                            message: l.msgClean
+                        });
+                    }
+                    updateContainersMonitor();
+                } else {
+                    showCustomPopup({ type: 'error', title: l.popErrorTitle, message: l.msgError });
+                }
+            } catch (err) {
+                showCustomPopup({ type: 'error', title: l.popErrorTitle, message: l.msgCritical });
+            }
         }
-    } catch (err) {
-        alert(l.msgCritical);
-    }
+    });
 }
 
 async function toggleSettingsModal(show) {
