@@ -39,14 +39,17 @@ app.get('/api/stats', async (req, res) => {
 });
 
 app.get('/api/settings', (req, res) => { res.json({ config: readConfig() }); });
+// Di dalam fungsi app.post('/api/settings/config', ...)
 app.post('/api/settings/config', (req, res) => {
-    const { showCpu, showRam, showUptime, showTemp, chartPoints, lang, mainTitle, hostTag } = req.body;
+    const { showCpu, showRam, showUptime, showTemp, chartPoints, lang, mainTitle, hostTag, dashboardPort } = req.body;
     writeConfig({ 
         showCpu: showCpu === true, showRam: showRam === true, showUptime: showUptime === true, showTemp: showTemp === true, 
         chartPoints: parseInt(chartPoints) || 20, lang: lang === 'en' ? 'en' : 'id',
-        mainTitle: mainTitle || "Sistem Pusat Kendali", hostTag: hostTag || "STB-SERVER"
+        mainTitle: mainTitle || "Sistem Pusat Kendali", 
+        hostTag: hostTag || "STB-SERVER",
+        dashboardPort: parseInt(dashboardPort) || 3080
     });
-    res.json({ success: true });
+    res.json({ success: true, message: "Konfigurasi disimpan. Silakan restart aplikasi untuk perubahan port." });
 });
 
 // Endpoint Terpisah: Mengirimkan dua objek data terpisah (system & docker)

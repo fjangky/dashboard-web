@@ -20,6 +20,8 @@ const dictionary = {
         secLang: 'Bahasa Terpilih',
         lblLang: 'Pilih Bahasa',
         secTele: 'Modul Pemantauan',
+        secNetwork: 'Jaringan',
+        lblPort: 'Port Dashboard',
         optCpu: 'Pantau Status CPU',
         optRam: 'Pantau Status RAM',
         optUptime: 'Pantau Waktu Aktif',
@@ -55,6 +57,8 @@ const dictionary = {
         secLang: 'System Language',
         lblLang: 'Choose Language',
         secTele: 'Monitoring Modules',
+        secNetwork: 'Network',
+        lblPort: 'Port Dashboard',
         optCpu: 'Monitor CPU Status',
         optRam: 'Monitor RAM Status',
         optUptime: 'Monitor System Uptime',
@@ -130,6 +134,8 @@ function applyLanguage(lang) {
     document.getElementById('txt-opt-temp').innerText = l.optTemp;
     document.getElementById('txt-opt-chart').innerText = l.optChart;
     document.getElementById('btn-save-config').innerText = l.btnSave;
+    document.getElementById('txt-sec-network').innerText = l.secNetwork;
+    document.getElementById('txt-lbl-port').innerText = l.lblPort;
 }
 
 const cpuChart = new Chart(ctx, {
@@ -254,6 +260,7 @@ async function toggleSettingsModal(show) {
         document.getElementById('set-lang').value = data.config.lang || 'id';
         document.getElementById('set-mainTitle').value = data.config.mainTitle || '';
         document.getElementById('set-hostTag').value = data.config.hostTag || '';
+        document.getElementById('set-dashboardPort').value = data.config.dashboardPort || 3080;
     } else { modal.classList.remove('active'); }
 }
 
@@ -262,6 +269,7 @@ document.getElementById('settingsForm').addEventListener('submit', async (e) => 
     const configData = {
         showCpu: document.getElementById('set-showCpu').checked, showRam: document.getElementById('set-showRam').checked,
         showUptime: document.getElementById('set-showUptime').checked, showTemp: document.getElementById('set-showTemp').checked,
+        dashboardPort: parseInt(document.getElementById('set-dashboardPort').value) || 3080,
         chartPoints: parseInt(document.getElementById('set-chartPoints').value) || 20, lang: document.getElementById('set-lang').value,
         mainTitle: document.getElementById('set-mainTitle').value.trim(), hostTag: document.getElementById('set-hostTag').value.trim()
     };
