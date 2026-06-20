@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  pusat-kendali:
+    container_name: dashboard-pusat-kendali
+    build:
+      context: .
+      dockerfile: Dockerfile
+    network_mode: "host"
+    volumes:
+      # Sangat krusial agar backend dapat mendeteksi container lain di ZimaOS
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Agar file konfigurasi port dan setelan tidak hilang saat container restart
+      - ./config.json:/app/config.json
+    environment:
+      - NODE_ENV=production
+    restart: always
