@@ -1,283 +1,131 @@
-const ctx = document.getElementById('cpuChart').getContext('2d');
+// Konfigurasi awal
+const ctx = document.getElementById('cpuChart') ? document.getElementById('cpuChart').getContext('2d') : null;
 let maxChartPoints = 20;
 let currentLang = 'id';
 
+// Kamus Bahasa
 const dictionary = {
     id: {
         cockpitBtn: '<i class="fa-solid fa-gear"></i> Pengaturan Sistem',
-        chartTitle: '<i class="fa-solid fa-chart-line"></i> Grafik Beban Kerja Real-Time',
-        lblCpu: 'Beban CPU',
-        lblRam: 'Penggunaan RAM',
-        lblUptime: 'Waktu Aktif Sistem',
-        lblTemp: 'Suhu Perangkat',
-        sysTitle: '<i class="fa-solid fa-server icon-sys-header"></i> Layanan Armbian System',
-        dockerTitle: '<i class="fa-solid fa-box-archive"></i> Kontainer Docker',
-        purgeBtn: '<i class="fa-solid fa-broom"></i> Bersihkan Kontainer Mati',
-        modalTitle: 'Konfigurasi Panel',
-        secIdentity: 'Identitas Perangkat',
-        lblTitleInput: 'Nama Sistem Utama',
-        lblHostInput: 'Nama Host / Tag',
-        secLang: 'Bahasa Terpilih',
-        lblLang: 'Pilih Bahasa',
-        secTele: 'Modul Pemantauan',
-        secNetwork: 'Jaringan',
-        lblPort: 'Port Dashboard',
-        optCpu: 'Pantau Status CPU',
-        optRam: 'Pantau Status RAM',
-        optUptime: 'Pantau Waktu Aktif',
-        optTemp: 'Pantau Suhu Inti',
-        optChart: 'Titik Segarkan Grafik',
+        chartTitle: '<i class="fa-solid fa-chart-line"></i> Grafik Beban Kerja',
+        lblCpu: 'Beban CPU', lblRam: 'Penggunaan RAM',
+        lblUptime: 'Waktu Aktif', lblTemp: 'Suhu',
+        lblStorage: 'Penyimpanan',
+        sysTitle: 'Layanan Armbian System',
+        dockerTitle: 'Kontainer Docker',
         btnSave: 'Simpan Konfigurasi',
-        rackEmpty: 'Tidak ada aplikasi aktif.',
-        popConfirmTitle: 'Konfirmasi Pembersihan',
-        confirmPurge: 'Apakah Anda ingin membersihkan Docker? Seluruh kontainer yang sudah berhenti akan dihapus.',
-        popSuccessTitle: 'Docker Dibersihkan',
-        msgSuccess: 'Berhasil menghapus $count kontainer tak terpakai.',
-        popCleanTitle: 'Info Sistem',
-        msgClean: 'Kontainer Docker Anda sudah bersih sepenuhnya!',
-        popErrorTitle: 'Kesalahan Sistem',
-        msgError: 'Gagal melakukan pembersihan sistem Docker.',
-        msgCritical: 'Gagal tersambung dengan sistem inti server.',
-        btnYes: 'Ya, Bersihkan', btnNo: 'Batal', btnOk: 'Selesai'
+        rackEmpty: 'Tidak ada aplikasi aktif.'
     },
     en: {
         cockpitBtn: '<i class="fa-solid fa-gear"></i> System Settings',
-        chartTitle: '<i class="fa-solid fa-chart-line"></i> Real-Time Workload Stream',
-        lblCpu: 'CPU Load',
-        lblRam: 'RAM Usage',
-        lblUptime: 'System Uptime',
-        lblTemp: 'Device Temperature',
-        sysTitle: '<i class="fa-solid fa-server icon-sys-header"></i> Armbian System Services',
-        dockerTitle: '<i class="fa-solid fa-box-archive"></i> Docker Containers',
-        purgeBtn: '<i class="fa-solid fa-broom"></i> Prune Idle Containers',
-        modalTitle: 'Panel Configuration',
-        secIdentity: 'Device Identity',
-        lblTitleInput: 'Main System Title',
-        lblHostInput: 'Host / Tag Name',
-        secLang: 'System Language',
-        lblLang: 'Choose Language',
-        secTele: 'Monitoring Modules',
-        secNetwork: 'Network',
-        lblPort: 'Port Dashboard',
-        optCpu: 'Monitor CPU Status',
-        optRam: 'Monitor RAM Status',
-        optUptime: 'Monitor System Uptime',
-        optTemp: 'Monitor Device Temperature',
-        optChart: 'Chart Refresh Points',
+        chartTitle: '<i class="fa-solid fa-chart-line"></i> Workload Stream',
+        lblCpu: 'CPU Load', lblRam: 'RAM Usage',
+        lblUptime: 'Uptime', lblTemp: 'Temp',
+        lblStorage: 'Storage',
+        sysTitle: 'Armbian System Services',
+        dockerTitle: 'Docker Containers',
         btnSave: 'Save Configuration',
-        rackEmpty: 'No active services.',
-        popConfirmTitle: 'Docker Optimization',
-        confirmPurge: 'Do you want to clear Docker? All stopped containers will be removed.',
-        popSuccessTitle: 'Docker Purged',
-        msgSuccess: 'Successfully cleared $count unused containers.',
-        popCleanTitle: 'System Notification',
-        msgClean: 'Your Docker space is already fully optimized!',
-        popErrorTitle: 'System Error',
-        msgError: 'Failed to perform Docker system prune.',
-        msgCritical: 'Failed to connect to the server core system.',
-        btnYes: 'Yes, Clean Up', btnNo: 'Cancel', btnOk: 'Got It'
+        rackEmpty: 'No active services.'
     }
 };
 
-function showCustomPopup({ type, title, message, onConfirm = null }) {
-    const overlay = document.getElementById('customPopup');
-    const iconBox = document.getElementById('pop-icon');
-    const titleBox = document.getElementById('pop-title');
-    const msgBox = document.getElementById('pop-message');
-    const btnBox = document.getElementById('pop-buttons');
-    const l = dictionary[currentLang];
-
-    iconBox.className = "popup-icon";
-    if (type === 'warn') { iconBox.classList.add('warn'); iconBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>'; }
-    else if (type === 'success') { iconBox.classList.add('success'); iconBox.innerHTML = '<i class="fa-solid fa-circle-check"></i>'; }
-    else if (type === 'error') { iconBox.classList.add('error'); iconBox.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>'; }
-
-    titleBox.innerText = title; msgBox.innerText = message; btnBox.innerHTML = '';
-
-    if (onConfirm) {
-        const yesBtn = document.createElement('button'); yesBtn.className = 'btn-pop-confirm'; yesBtn.innerText = l.btnYes; yesBtn.onclick = () => { overlay.classList.remove('active'); onConfirm(); };
-        const noBtn = document.createElement('button'); noBtn.className = 'btn-pop-cancel'; noBtn.innerText = l.btnNo; noBtn.onclick = () => overlay.classList.remove('active');
-        btnBox.appendChild(noBtn); btnBox.appendChild(yesBtn);
-    } else {
-        const okBtn = document.createElement('button'); okBtn.className = 'btn-pop-confirm'; okBtn.innerText = l.btnOk; okBtn.onclick = () => overlay.classList.remove('active');
-        btnBox.appendChild(okBtn);
-    }
-    overlay.classList.add('active');
-}
-
-function applyLanguage(lang) {
-    currentLang = lang;
-    const l = dictionary[lang];
-    document.getElementById('btn-cockpit').innerHTML = l.cockpitBtn;
-    document.getElementById('txt-chart-title').innerHTML = l.chartTitle;
-    document.getElementById('txt-lbl-cpu').innerText = l.lblCpu;
-    document.getElementById('txt-lbl-ram').innerText = l.lblRam;
-    document.getElementById('txt-lbl-uptime').innerText = l.lblUptime;
-    document.getElementById('txt-lbl-temp').innerText = l.lblTemp;
-    
-    const sysText = document.getElementById('sys-count').outerHTML;
-    document.getElementById('txt-sys-title').innerHTML = `${l.sysTitle} ${sysText}`;
-    const dockerText = document.getElementById('docker-count').outerHTML;
-    document.getElementById('txt-docker-title').innerHTML = `${l.dockerTitle} ${dockerText}`;
-    
-    document.getElementById('btn-purge').innerHTML = `<i class="fa-solid fa-broom"></i> ${l.purgeBtn.replace('<i class="fa-solid fa-broom"></i> ', '')}`;
-    document.getElementById('txt-modal-title').innerText = l.modalTitle;
-    document.getElementById('txt-sec-identity').innerText = l.secIdentity;
-    document.getElementById('txt-lbl-title-input').innerText = l.lblTitleInput;
-    document.getElementById('txt-lbl-host-input').innerText = l.lblHostInput;
-    document.getElementById('txt-sec-lang').innerText = l.secLang;
-    document.getElementById('txt-lbl-lang').innerText = l.lblLang;
-    document.getElementById('txt-sec-tele').innerText = l.secTele;
-    document.getElementById('txt-opt-cpu').innerText = l.optCpu;
-    document.getElementById('txt-opt-ram').innerText = l.optRam;
-    document.getElementById('txt-opt-uptime').innerText = l.optUptime;
-    document.getElementById('txt-opt-temp').innerText = l.optTemp;
-    document.getElementById('txt-opt-chart').innerText = l.optChart;
-    document.getElementById('btn-save-config').innerText = l.btnSave;
-    document.getElementById('txt-sec-network').innerText = l.secNetwork;
-    document.getElementById('txt-lbl-port').innerText = l.lblPort;
-}
-
-const cpuChart = new Chart(ctx, {
+// Inisialisasi Grafik
+const cpuChart = ctx ? new Chart(ctx, {
     type: 'line',
-    data: { labels: [], datasets: [{ label: 'CPU', data: [], borderColor: '#00ffcc', backgroundColor: 'rgba(0, 255, 204, 0.01)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0 }] },
-    options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { min: 0, max: 100, grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 11 } } } } }
-});
+    data: { labels: [], datasets: [{ data: [], borderColor: '#00ffcc', backgroundColor: 'rgba(0, 255, 204, 0.05)', fill: true, tension: 0.4 }] },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100 } } }
+}) : null;
 
+// Fungsi Utama: Mengambil Data Statistik
 async function fetchData() {
     try {
         const res = await fetch('/api/stats');
         const data = await res.json();
+        
+        // Update Kartu Statistik
         document.getElementById('cpu-text').innerHTML = `${data.cpuUsage}<span>%</span>`;
         document.getElementById('ram-text').innerHTML = `${data.ramUsage}<span>%</span>`;
-        document.getElementById('uptime-text').innerHTML = `${data.uptime}<span>s</span>`;
         document.getElementById('temp-text').innerHTML = `${data.temperature}<span>°C</span>`;
+        document.getElementById('uptime-text').innerHTML = `${Math.floor(data.uptime / 60)}<span>m</span>`;
         
-        document.getElementById('card-cpu').style.display = data.config.showCpu ? 'flex' : 'none';
-        document.getElementById('card-ram').style.display = data.config.showRam ? 'flex' : 'none';
-        document.getElementById('card-uptime').style.display = data.config.showUptime ? 'flex' : 'none';
-        document.getElementById('card-temp').style.display = data.config.showTemp ? 'flex' : 'none';
+        // Update Storage
+        document.getElementById('disk-text').innerHTML = `${data.diskUsage.percent}<span>%</span>`;
+        document.getElementById('disk-detail').innerText = `${data.diskUsage.used} / ${data.diskUsage.total} GB`;
         
-        maxChartPoints = data.config.chartPoints;
-        document.getElementById('main-app-logo').innerHTML = `${data.config.mainTitle || "Sistem Pusat Kendali"} <span id="main-app-host">${data.config.hostTag || "STB-SERVER"}</span>`;
-        
-        applyLanguage(data.config.lang || 'id');
-
+        // Update Grafik
         const time = new Date().toLocaleTimeString();
-        while (cpuChart.data.labels.length >= maxChartPoints) { cpuChart.data.labels.shift(); cpuChart.data.datasets[0].data.shift(); }
-        cpuChart.data.labels.push(time); cpuChart.data.datasets[0].data.push(data.cpuUsage); cpuChart.update('none');
-    } catch (e) { console.log("Sambungan telemetri terputus."); }
+        if (cpuChart.data.labels.length >= maxChartPoints) { 
+            cpuChart.data.labels.shift(); cpuChart.data.datasets[0].data.shift(); 
+        }
+        cpuChart.data.labels.push(time); 
+        cpuChart.data.datasets[0].data.push(data.cpuUsage); 
+        cpuChart.update('none');
+    } catch (e) { console.warn("Telemetri terputus."); }
 }
 
+// Fungsi Utama: Mengambil Data Layanan
 async function updateContainersMonitor() {
     try {
         const res = await fetch('/api/services');
         const services = await res.json();
-        
-        document.getElementById('sys-count').innerText = `(${services.system.length})`;
-        document.getElementById('docker-count').innerText = `(${services.docker.length})`;
-
         const sysBox = document.getElementById('system-services-container');
         const dockerBox = document.getElementById('docker-services-container');
         
         sysBox.innerHTML = '';
         dockerBox.innerHTML = '';
-        const l = dictionary[currentLang];
 
-        if(services.system.length === 0) {
-            sysBox.innerHTML = `<p style="color: #9ca3af; font-size: 13px; padding: 15px; text-align: center;">${l.rackEmpty}</p>`;
-        } else {
-            services.system.forEach(s => sysBox.innerHTML += createBladeHtml(s));
-        }
-
-        if(services.docker.length === 0) {
-            dockerBox.innerHTML = `<p style="color: #9ca3af; font-size: 13px; padding: 15px; text-align: center;">${l.rackEmpty}</p>`;
-        } else {
-            services.docker.forEach(s => dockerBox.innerHTML += createBladeHtml(s));
-        }
-    } catch (err) { console.log("Gagal menyinkronkan daftar aplikasi."); }
+        services.system.forEach(s => sysBox.innerHTML += createBladeHtml(s));
+        services.docker.forEach(s => dockerBox.innerHTML += createBladeHtml(s));
+    } catch (err) { console.error("Gagal sinkronisasi layanan."); }
 }
 
-// Fungsi Terpusat: Merender Baris Blade Beserta Ikon dan Status
+// Render Komponen Blade
 function createBladeHtml(s) {
     const isRunning = s.state === 'running';
-    const ledClass = isRunning ? 'led-active' : 'led-offline';
-    const statusColor = isRunning ? '#00ffcc' : '#f87171';
-    const statusBg = isRunning ? 'rgba(0, 255, 204, 0.05)' : 'rgba(248, 113, 113, 0.05)';
-    const statusText = isRunning ? (currentLang === 'id' ? 'Aktif' : 'Active') : (currentLang === 'id' ? 'Berhenti' : 'Stopped');
-    
-    // Penentuan ikon jaringan berdasarkan tipe aplikasi secara otomatis
-    const netIcon = s.type === 'system' ? '<i class="fa-solid fa-network-wired"></i>' : '<i class="fa-solid fa-ethernet"></i>';
-    
-    // Label tambahan untuk membedakan service OS asli di UI
-    const osBadge = s.type === 'system' ? '<span style="font-size:10px; color:#38bdf8; border:1px solid rgba(56,189,248,0.4); padding:1px 5px; border-radius:4px; font-weight:500;">OS</span>' : '';
-
     return `
         <div class="server-blade">
             <div class="blade-left">
-                <div class="led ${ledClass}"></div>
+                <div class="led ${isRunning ? 'led-active' : 'led-offline'}"></div>
                 <div class="blade-details">
-                    <h4>${s.name} ${osBadge}</h4>
-                    <p>ID: ${s.id} | Base: ${s.image}</p>
+                    <h4>${s.name}</h4>
+                    <p>${s.type === 'system' ? 'Native OS' : s.image}</p>
                 </div>
             </div>
-            <div class="blade-network">${netIcon} Port: ${s.ports}</div>
-            <div class="blade-status-text" style="color: ${statusColor}; background: ${statusBg};">
-                ${statusText}
-            </div>
+            <div class="blade-network"><i class="fa-solid fa-plug"></i> ${s.ports}</div>
         </div>`;
 }
 
-function pruneContainers() {
-    const l = dictionary[currentLang];
-    showCustomPopup({
-        type: 'warn', title: l.popConfirmTitle, message: l.confirmPurge,
-        onConfirm: async () => {
-            try {
-                const res = await fetch('/api/containers/prune', { method: 'POST' });
-                const result = await res.json();
-                if (result.success) {
-                    if (result.message > 0) { showCustomPopup({ type: 'success', title: l.popSuccessTitle, message: l.msgSuccess.replace('$count', result.message) }); }
-                    else { showCustomPopup({ type: 'success', title: l.popCleanTitle, message: l.msgClean }); }
-                    updateContainersMonitor();
-                } else { showCustomPopup({ type: 'error', title: l.popErrorTitle, message: l.msgError }); }
-            } catch (err) { showCustomPopup({ type: 'error', title: l.popErrorTitle, message: l.msgCritical }); }
-        }
-    });
-}
-
+// Pengaturan Modal
 async function toggleSettingsModal(show) {
     const modal = document.getElementById('settingsModal');
     if (show) {
         modal.classList.add('active');
         const res = await fetch('/api/settings');
         const data = await res.json();
-        document.getElementById('set-showCpu').checked = data.config.showCpu;
-        document.getElementById('set-showRam').checked = data.config.showRam;
-        document.getElementById('set-showUptime').checked = data.config.showUptime;
-        document.getElementById('set-showTemp').checked = data.config.showTemp || false;
-        document.getElementById('set-chartPoints').value = data.config.chartPoints;
-        document.getElementById('set-lang').value = data.config.lang || 'id';
+        document.getElementById('set-dashboardPort').value = data.config.dashboardPort || 3000;
         document.getElementById('set-mainTitle').value = data.config.mainTitle || '';
-        document.getElementById('set-hostTag').value = data.config.hostTag || '';
-        document.getElementById('set-dashboardPort').value = data.config.dashboardPort || 3080;
     } else { modal.classList.remove('active'); }
 }
 
+// Event Handler: Simpan Konfigurasi
 document.getElementById('settingsForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const configData = {
-        showCpu: document.getElementById('set-showCpu').checked, showRam: document.getElementById('set-showRam').checked,
-        showUptime: document.getElementById('set-showUptime').checked, showTemp: document.getElementById('set-showTemp').checked,
-        dashboardPort: parseInt(document.getElementById('set-dashboardPort').value) || 3080,
-        chartPoints: parseInt(document.getElementById('set-chartPoints').value) || 20, lang: document.getElementById('set-lang').value,
-        mainTitle: document.getElementById('set-mainTitle').value.trim(), hostTag: document.getElementById('set-hostTag').value.trim()
+        dashboardPort: document.getElementById('set-dashboardPort').value,
+        mainTitle: document.getElementById('set-mainTitle').value
     };
-    await fetch('/api/settings/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(configData) });
-    toggleSettingsModal(false); fetchData(); setTimeout(updateContainersMonitor, 500);
+    const res = await fetch('/api/settings/config', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify(configData) 
+    });
+    const result = await res.json();
+    alert(result.message);
+    toggleSettingsModal(false);
 });
 
-setInterval(fetchData, 2000);
-setInterval(updateContainersMonitor, 4000);
+// Inisialisasi Interval
+setInterval(fetchData, 5000);
+setInterval(updateContainersMonitor, 10000);
 fetchData();
 updateContainersMonitor();
