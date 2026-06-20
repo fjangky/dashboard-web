@@ -7,7 +7,8 @@ const exec = require('child_process').exec;
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 const app = express();
-const PORT = 3080;
+let config = readConfig();
+const PORT = config.dashboardPort || 3080;
 const CONFIG_FILE = path.join(__dirname, 'config.json');
 
 if (!fs.existsSync(CONFIG_FILE)) {
@@ -50,6 +51,9 @@ app.post('/api/settings/config', (req, res) => {
         dashboardPort: parseInt(dashboardPort) || 3080
     });
     res.json({ success: true, message: "Konfigurasi disimpan. Silakan restart aplikasi untuk perubahan port." });
+    setTimeout(() => {
+        process.exit(0); // Mematikan aplikasi agar PM2 melakukan restart otomatis
+    }, 2000);
 });
 
 // Endpoint Terpisah: Mengirimkan dua objek data terpisah (system & docker)
@@ -112,4 +116,6 @@ app.post('/api/containers/prune', async (req, res) => {
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.listen(PORT, '0.0.0.0', () => console.log(`Pusat Kendali aktif di port: ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Pusat Kendali aktif di port: ${PORT}`);
+});
