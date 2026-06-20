@@ -47,7 +47,7 @@ async function scanNativeServices() {
     // =============== DAFTAR WHITELIST APLIKASI UTAMA ===============
     // Tambahkan atau sesuaikan nama proses/aplikasi asli yang HANYA boleh muncul di dashboard Anda.
     // Ditulis dalam huruf kecil (lowercase) agar pencocokannya akurat.
-    const allowedApps = ['bt', 'aapanel', 'node', 'python']; 
+    const allowedApps = ['bt', 'aapanel', 'node', 'casaos']; 
     // Keterangan: 'bt' biasanya adalah nama proses/service utama milik aaPanel di core Linux.
     // ===============================================================
 
