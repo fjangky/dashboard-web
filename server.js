@@ -64,19 +64,19 @@ app.post('/api/settings/config', (req, res) => {
     res.json({ success: true });
 });
 
-// Endpoint Terpadu: Menggabungkan Layanan Armbian (aaPanel Port 81) + Docker
+// Endpoint Otomatis: Mencari Port, ID, dan Base secara dinamis
 app.get('/api/services', async (req, res) => {
     const servicesList = [];
 
-    // 1. Deteksi aaPanel via port 81 pada sistem Armbian
+    // 1. Deteksi otomatis aaPanel (Aplikasi Sistem Native Armbian)
     const checkAapanel = () => {
         return new Promise((resolve) => {
             exec('ss -tuln | grep :81', (err, stdout) => {
                 const isRunning = stdout.includes(':81');
                 servicesList.push({
-                    id: "SYS-01",
+                    id: "ARMBIAN-SYS",
                     name: "aaPanel Control Panel",
-                    image: "Armbian Native Service",
+                    image: "Native Service",
                     state: isRunning ? "running" : "stopped",
                     ports: "81",
                     type: "system"
@@ -89,23 +89,37 @@ app.get('/api/services', async (req, res) => {
     try {
         await checkAapanel();
 
-        // 2. Ambil data kontainer dari Docker
+        // 2. Ambil data kontainer dari Docker secara otomatis
         const containers = await docker.listContainers({ all: true });
+        
         containers.forEach(c => {
-            const ports = c.Ports.map(p => p.PublicPort ? `${p.PublicPort}:${p.PrivatePort}` : p.PrivatePort).join(', ') || 'N/A';
+            // Mengambil daftar port secara dinamis dan bersih (Contoh: "8080->80" atau "3306")
+            const portMap = c.Ports.map(p => {
+                if (p.PublicPort) {
+                    return `${p.PublicPort}:${p.PrivatePort}`; // Port luar ke port dalam kontainer
+                }
+                return p.PrivatePort; // Hanya port internal jika tidak di-publish luar
+            });
+            
+            // Gabungkan array port menjadi string, hapus duplikasi jika ada
+            const finalPorts = [...new Set(portMap)].join(', ') || 'No Port';
+
+            // Bersihkan nama base image yang panjang (Hapus hash sha256 jika ada)
+            const cleanImageName = c.Image.startsWith('sha256:') ? 'Custom Image' : c.Image;
+
             servicesList.push({ 
-                id: c.Id.substring(0, 12), 
-                name: c.Names[0].replace(/^\//, ''), 
-                image: c.Image, 
-                state: c.State, 
-                ports: ports,
+                id: c.Id.substring(0, 12),              // Otomatis mengambil 12 Karakter Pertama ID Kontainer
+                name: c.Names[0].replace(/^\//, ''),    // Otomatis mengambil Nama Kontainer (membersihkan tanda /)
+                image: cleanImageName,                  // Otomatis mengambil Base Image yang dipakai
+                state: c.State,                         // Otomatis mendeteksi status running/stopped
+                ports: finalPorts,                      // Otomatis memetakan port yang digunakan
                 type: "docker"
             });
         });
 
         res.json(servicesList);
     } catch (err) {
-        // Jika Docker offline, tetap kirimkan layanan sistem native yang berhasil didapat
+        // Jika Docker mengalami kendala, dashboard tetap menampilkan aaPanel
         res.json(servicesList);
     }
 });
