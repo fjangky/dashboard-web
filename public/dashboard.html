@@ -10,89 +10,65 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body { 
-            background-color: #0b111e; 
-            background-image: 
-                radial-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 0),
-                radial-gradient(rgba(0, 255, 204, 0.02) 1px, transparent 0);
-            background-size: 24px 24px;
-            background-position: 0 0, 12px 12px;
-            color: #e2e8f0; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            min-height: 100vh; 
-            padding: 30px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 25px; 
-        }
-
+        body { background-color: #0b111e; background-image: radial-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 0); background-size: 24px 24px; color: #e2e8f0; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; padding: 30px; display: flex; flex-direction: column; gap: 25px; }
         .app-container { max-width: 1400px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 25px; }
+        
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 20px; }
-        .logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: #ffffff; display: flex; align-items: center; gap: 10px; }
-        .logo span { color: #00ffcc; background: rgba(0, 255, 204, 0.08); padding: 4px 10px; border-radius: 6px; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; }
+        .logo { font-size: 22px; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 10px; }
+        .logo span { color: #00ffcc; background: rgba(0, 255, 204, 0.08); padding: 4px 10px; border-radius: 6px; font-size: 14px; font-weight: 600; }
         
         .btn { border: none; padding: 10px 18px; border-radius: 6px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; cursor: pointer; font-weight: 600; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px; }
         .settings-btn { background: rgba(0, 255, 204, 0.05); border: 1px solid rgba(0, 255, 204, 0.3); color: #00ffcc; }
         .settings-btn:hover { background: #00ffcc; color: #0b111e; box-shadow: 0 4px 12px rgba(0, 255, 204, 0.2); }
-        .prune-btn { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
-        .prune-btn:hover { background: #ef4444; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
+        .prune-btn { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; padding: 6px 12px; font-size: 11px; border-radius: 4px; }
+        .prune-btn:hover { background: #ef4444; color: white; }
 
-        .main-layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 25px; align-items: stretch; }
+        .main-layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 25px; }
         .status-sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         
-        .card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; transition: border-color 0.2s ease; }
-        .card:hover { border-color: #374151; }
-        .card h3 { font-size: 13px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; font-weight: 600; }
-        
-        .icon-cpu { color: #00ffcc; }
-        .icon-ram { color: #c084fc; }
-        .icon-uptime { color: #fbbf24; }
-        .icon-temp { color: #f87171; }
-
+        .card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; }
+        .card h3 { font-size: 13px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
         .card .value { font-size: 32px; font-weight: 700; color: #ffffff; }
-        .card .value span { font-size: 16px; color: #6b7280; margin-left: 4px; font-weight: 500; }
+        .card .value span { font-size: 16px; color: #6b7280; margin-left: 4px; }
         .chart-container { padding: 24px; }
         canvas { width: 100% !important; height: 220px !important; margin-top: 15px; }
 
+        .services-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; width: 100%; }
+        @media (max-width: 1100px) { .services-wrapper { grid-template-columns: 1fr; } }
+
         .monitor-section { width: 100%; display: flex; flex-direction: column; gap: 15px; }
-        .monitor-header { display: flex; justify-content: space-between; align-items: center; }
-        .monitor-section h2 { font-size: 18px; color: #ffffff; display: flex; align-items: center; gap: 10px; font-weight: 600; }
-        .monitor-rack { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+        .monitor-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1f2937; padding-bottom: 8px; }
+        .monitor-section h2 { font-size: 15px; color: #ffffff; display: flex; align-items: center; gap: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .monitor-section h2 span { font-size: 12px; color: #6b7280; }
+        .monitor-rack { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 10px; min-height: 100px; }
 
-        .server-blade { background: #1f2937; border: 1px solid transparent; border-radius: 8px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease; }
-        .server-blade:hover { background: #2563eb0a; border-color: rgba(37, 99, 235, 0.2); }
+        .server-blade { background: #1f2937; border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
+        .blade-left { display: flex; align-items: center; gap: 14px; width: 60%; }
+        .led { width: 9px; height: 9px; border-radius: 50%; }
+        .led-active { background: #00ffcc; box-shadow: 0 0 8px rgba(0, 255, 204, 0.5); }
+        .led-offline { background: #f87171; box-shadow: 0 0 8px rgba(248, 113, 113, 0.5); }
 
-        .blade-left { display: flex; align-items: center; gap: 16px; width: 50%; }
-        .led { width: 10px; height: 10px; border-radius: 50%; background: #4b5563; }
-        .led-active { background: #00ffcc; box-shadow: 0 0 8px rgba(0, 255, 204, 0.6); }
-        .led-offline { background: #f87171; box-shadow: 0 0 8px rgba(248, 113, 113, 0.6); }
-
-        .blade-details h4 { font-size: 15px; color: #ffffff; font-weight: 600; }
-        .blade-details p { font-size: 12px; color: #9ca3af; margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
-        .blade-network { font-size: 13px; color: #e2e8f0; width: 30%; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 6px; }
-        .blade-network i { color: #64748b; }
-        .blade-status-text { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.03); text-transform: uppercase; }
+        .blade-details h4 { font-size: 14px; color: #ffffff; font-weight: 600; }
+        .blade-details p { font-size: 11px; color: #9ca3af; margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+        .blade-network { font-size: 12px; color: #e2e8f0; width: 25%; font-family: 'JetBrains Mono', monospace; text-align: right; }
+        .blade-status-text { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: all 0.2s ease; z-index: 100; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal { background: #111827; border: 1px solid #1f2937; width: 90%; max-width: 440px; border-radius: 12px; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); max-height: 85vh; overflow-y: auto; }
+        .modal { background: #111827; border: 1px solid #1f2937; width: 90%; max-width: 440px; border-radius: 12px; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .modal-header h2 { font-size: 18px; font-weight: 700; color: #ffffff; }
         .close-modal { background: none; border: none; color: #9ca3af; font-size: 20px; cursor: pointer; }
-        .close-modal:hover { color: #f87171; }
         
         .setting-section h4 { color: #38bdf8; font-size: 11px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-        .toggle-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 14px; color: #e2e8f0; gap: 10px; }
+        .toggle-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 14px; color: #e2e8f0; }
         .save-btn { background: #00ffcc; color: #0b111e; width: 100%; padding: 12px; border-radius: 6px; margin-top: 20px; font-weight: 700; font-size: 14px; justify-content: center; }
-        .select-input { width: 120px; background: #1f2937; border: 1px solid #374151; color: #ffffff; padding: 6px 10px; border-radius: 6px; font-size: 13px; outline: none; }
-        .text-input { width: 100%; background: #1f2937; border: 1px solid #374151; color: #ffffff; padding: 8px 12px; border-radius: 6px; font-size: 13px; outline: none; transition: border-color 0.2s; }
-        .text-input:focus { border-color: #00ffcc; }
+        .select-input, .text-input { background: #1f2937; border: 1px solid #374151; color: #ffffff; padding: 6px 10px; border-radius: 6px; font-size: 13px; outline: none; }
+        .text-input { width: 100%; padding: 8px 12px; }
 
         .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(7, 10, 19, 0.8); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 200; }
         .popup-overlay.active { opacity: 1; pointer-events: auto; }
-        .popup-box { background: #111827; border: 1px solid #1e293b; border-radius: 14px; padding: 24px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transform: scale(0.9); transition: transform 0.2s ease; }
-        .popup-overlay.active .popup-box { transform: scale(1); }
+        .popup-box { background: #111827; border: 1px solid #1e293b; border-radius: 14px; padding: 24px; width: 90%; max-width: 400px; text-align: center; }
         .popup-icon { font-size: 38px; margin-bottom: 16px; display: inline-block; }
         .popup-icon.warn { color: #fbbf24; }
         .popup-icon.success { color: #00ffcc; }
@@ -100,14 +76,11 @@
         .popup-title { font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 10px; }
         .popup-msg { font-size: 14px; color: #9ca3af; line-height: 1.5; margin-bottom: 22px; }
         .popup-buttons { display: flex; justify-content: center; gap: 12px; }
-        
-        .btn-pop-confirm { background: #00ffcc; color: #0b111e; font-weight: 700; padding: 10px 20px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; }
-        .btn-pop-confirm:hover { background: #05e6b7; }
-        .btn-pop-cancel { background: #1f2937; border: 1px solid #374151; color: #9ca3af; font-weight: 600; padding: 10px 20px; border-radius: 6px; font-size: 13px; cursor: pointer; }
-        .btn-pop-cancel:hover { background: #374151; color: #ffffff; }
+        .btn-pop-confirm { background: #00ffcc; color: #0b111e; font-weight: 700; padding: 10px 20px; border-radius: 6px; cursor: pointer; border: none; }
+        .btn-pop-cancel { background: #1f2937; border: 1px solid #374151; color: #9ca3af; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
 
-        @media (max-width: 960px) { .main-layout { grid-template-columns: 1fr; } .status-sidebar { grid-template-columns: 1fr 1fr; } }
-        @media (max-width: 540px) { body { padding: 15px; gap: 15px; } .status-sidebar { grid-template-columns: 1fr; gap: 15px; } .server-blade { flex-direction: column; align-items: start; gap: 10px; } .blade-left, .blade-network { width: 100%; } }
+        @media (max-width: 960px) { .main-layout { grid-template-columns: 1fr; } }
+        @media (max-width: 540px) { body { padding: 15px; } .status-sidebar { grid-template-columns: 1fr; } .server-blade { flex-direction: column; align-items: flex-start; gap: 10px; } .blade-left, .blade-network { width: 100%; text-align: left; } }
     </style>
 </head>
 <body>
@@ -115,7 +88,7 @@
 <div class="app-container">
     <div class="header">
         <div class="logo" id="main-app-logo">Sistem Pusat Kendali <span id="main-app-host">STB-SERVER</span></div>
-        <button class="btn settings-btn" id="btn-cockpit" onclick="toggleSettingsModal(true)"><i class="fa-solid fa-terminal"></i> Pengaturan Sistem</button>
+        <button class="btn settings-btn" id="btn-cockpit" onclick="toggleSettingsModal(true)"><i class="fa-solid fa-gear"></i> Pengaturan Sistem</button>
     </div>
 
     <div class="main-layout">
@@ -131,12 +104,22 @@
         </div>
     </div>
 
-    <div class="monitor-section">
-        <div class="monitor-header">
-            <h2 id="txt-rack-title"><i class="fa-solid fa-server"></i> Daftar Layanan Aplikasi (0 Terpasang)</h2>
-            <button class="btn prune-btn" id="btn-purge" onclick="pruneContainers()"><i class="fa-solid fa-broom"></i> Bersihkan Aplikasi Mati</button>
+    <div class="services-wrapper">
+        <div class="monitor-section">
+            <div class="monitor-header">
+                <h2 id="txt-sys-title"><i class="fa-solid fa-linux"></i> Layanan Armbian System <span id="sys-count">(0)</span></h2>
+                <button class="btn prune-btn" style="visibility:hidden;"><i class="fa-solid fa-broom"></i> Clear</button>
+            </div>
+            <div class="monitor-rack" id="system-services-container"></div>
         </div>
-        <div class="monitor-rack" id="containers-container"></div>
+
+        <div class="monitor-section">
+            <div class="monitor-header">
+                <h2 id="txt-docker-title"><i class="fa-solid fa-box-archive"></i> Kontainer Docker <span id="docker-count">(0)</span></h2>
+                <button class="btn prune-btn" id="btn-purge" onclick="pruneContainers()"><i class="fa-solid fa-broom"></i> Bersihkan Kontainer Mati</button>
+            </div>
+            <div class="monitor-rack" id="docker-services-container"></div>
+        </div>
     </div>
 </div>
 
@@ -148,35 +131,24 @@
                 <h4 id="txt-sec-identity">Identitas Perangkat</h4>
                 <div class="toggle-group" style="flex-direction: column; align-items: flex-start;">
                     <label style="margin-bottom: 5px; font-size: 13px;" id="txt-lbl-title-input">Nama Sistem Utama</label>
-                    <input type="text" id="set-mainTitle" class="text-input" placeholder="Sistem Pusat Kendali">
+                    <input type="text" id="set-mainTitle" class="text-input">
                 </div>
                 <div class="toggle-group" style="flex-direction: column; align-items: flex-start; margin-top: 10px;">
                     <label style="margin-bottom: 5px; font-size: 13px;" id="txt-lbl-host-input">Nama Host / Tag</label>
-                    <input type="text" id="set-hostTag" class="text-input" placeholder="STB-SERVER">
+                    <input type="text" id="set-hostTag" class="text-input">
                 </div>
             </div>
-
             <div class="setting-section" style="margin-bottom: 20px;">
                 <h4 id="txt-sec-lang">Bahasa Terpilih</h4>
-                <div class="toggle-group">
-                    <label id="txt-lbl-lang">Pilih Bahasa</label>
-                    <select id="set-lang" class="select-input">
-                        <option value="id">Indonesia</option>
-                        <option value="en">English</option>
-                    </select>
-                </div>
+                <div class="toggle-group"><label id="txt-lbl-lang">Pilih Bahasa</label><select id="set-lang" class="select-input"><option value="id">Indonesia</option><option value="en">English</option></select></div>
             </div>
-
             <div class="setting-section">
                 <h4 id="txt-sec-tele">Modul Pemantauan</h4>
                 <div class="toggle-group"><label id="txt-opt-cpu">Pantau Status CPU</label><input type="checkbox" id="set-showCpu"></div>
                 <div class="toggle-group"><label id="txt-opt-ram">Pantau Status RAM</label><input type="checkbox" id="set-showRam"></div>
                 <div class="toggle-group"><label id="txt-opt-uptime">Pantau Waktu Aktif</label><input type="checkbox" id="set-showUptime"></div>
                 <div class="toggle-group"><label id="txt-opt-temp">Pantau Suhu Inti</label><input type="checkbox" id="set-showTemp"></div>
-                <div class="toggle-group" style="margin-top: 15px;">
-                    <label id="txt-opt-chart">Titik Segarkan Grafik</label>
-                    <input type="number" id="set-chartPoints" min="5" max="50" class="select-input" style="width: 65px; text-align: center;">
-                </div>
+                <div class="toggle-group" style="margin-top: 15px;"><label id="txt-opt-chart">Titik Segarkan Grafik</label><input type="number" id="set-chartPoints" min="5" max="50" class="select-input" style="width: 65px; text-align: center;"></div>
             </div>
             <button type="submit" class="btn save-btn" id="btn-save-config">Simpan Konfigurasi</button>
         </form>

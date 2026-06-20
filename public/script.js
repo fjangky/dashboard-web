@@ -10,8 +10,9 @@ const dictionary = {
         lblRam: 'Penggunaan RAM',
         lblUptime: 'Waktu Aktif Sistem',
         lblTemp: 'Suhu Perangkat',
-        rackTitle: '<i class="fa-solid fa-server"></i> Daftar Layanan Aplikasi ($count Terpasang)',
-        purgeBtn: '<i class="fa-solid fa-broom"></i> Bersihkan Aplikasi Mati',
+        sysTitle: '<i class="fa-solid fa-linux"></i> Layanan Armbian System',
+        dockerTitle: '<i class="fa-solid fa-box-archive"></i> Kontainer Docker',
+        purgeBtn: '<i class="fa-solid fa-broom"></i> Bersihkan Kontainer Mati',
         modalTitle: 'Konfigurasi Panel',
         secIdentity: 'Identitas Perangkat',
         lblTitleInput: 'Nama Sistem Utama',
@@ -25,19 +26,17 @@ const dictionary = {
         optTemp: 'Pantau Suhu Inti',
         optChart: 'Titik Segarkan Grafik',
         btnSave: 'Simpan Konfigurasi',
-        rackEmpty: 'Belum ada aplikasi yang berjalan di sistem Anda.',
+        rackEmpty: 'Tidak ada aplikasi aktif.',
         popConfirmTitle: 'Konfirmasi Pembersihan',
-        confirmPurge: 'Apakah Anda ingin membersihkan sistem? Seluruh aplikasi kontainer yang sudah berhenti (tidak aktif) akan dihapus secara aman.',
-        popSuccessTitle: 'Sistem Dibersihkan',
-        msgSuccess: 'Sistem berhasil dibersihkan! Bersama dengan $count kontainer tak terpakai.',
+        confirmPurge: 'Apakah Anda ingin membersihkan Docker? Seluruh kontainer yang sudah berhenti akan dihapus.',
+        popSuccessTitle: 'Docker Dibersihkan',
+        msgSuccess: 'Berhasil menghapus $count kontainer tak terpakai.',
         popCleanTitle: 'Info Sistem',
-        msgClean: 'Sistem Anda sudah bersih sepenuhnya!',
+        msgClean: 'Kontainer Docker Anda sudah bersih sepenuhnya!',
         popErrorTitle: 'Kesalahan Sistem',
         msgError: 'Gagal melakukan pembersihan sistem Docker.',
         msgCritical: 'Gagal tersambung dengan sistem inti server.',
-        btnYes: 'Ya, Bersihkan',
-        btnNo: 'Batal',
-        btnOk: 'Selesai'
+        btnYes: 'Ya, Bersihkan', btnNo: 'Batal', btnOk: 'Selesai'
     },
     en: {
         cockpitBtn: '<i class="fa-solid fa-gear"></i> System Settings',
@@ -46,8 +45,9 @@ const dictionary = {
         lblRam: 'RAM Usage',
         lblUptime: 'System Uptime',
         lblTemp: 'Device Temperature',
-        rackTitle: '<i class="fa-solid fa-server"></i> Application Services List ($count Installed)',
-        purgeBtn: '<i class="fa-solid fa-broom"></i> Clear Idle Applications',
+        sysTitle: '<i class="fa-solid fa-linux"></i> Armbian System Services',
+        dockerTitle: '<i class="fa-solid fa-box-archive"></i> Docker Containers',
+        purgeBtn: '<i class="fa-solid fa-broom"></i> Prune Idle Containers',
         modalTitle: 'Panel Configuration',
         secIdentity: 'Device Identity',
         lblTitleInput: 'Main System Title',
@@ -61,19 +61,17 @@ const dictionary = {
         optTemp: 'Monitor Device Temperature',
         optChart: 'Chart Refresh Points',
         btnSave: 'Save Configuration',
-        rackEmpty: 'No applications are running on your system yet.',
-        popConfirmTitle: 'System Optimization',
-        confirmPurge: 'Do you want to clean up the system? All stopped container applications will be safely removed.',
-        popSuccessTitle: 'System Purged',
-        msgSuccess: 'System cleared successfully! Removed $count unused containers.',
+        rackEmpty: 'No active services.',
+        popConfirmTitle: 'Docker Optimization',
+        confirmPurge: 'Do you want to clear Docker? All stopped containers will be removed.',
+        popSuccessTitle: 'Docker Purged',
+        msgSuccess: 'Successfully cleared $count unused containers.',
         popCleanTitle: 'System Notification',
-        msgClean: 'Your system is already fully optimized!',
+        msgClean: 'Your Docker space is already fully optimized!',
         popErrorTitle: 'System Error',
         msgError: 'Failed to perform Docker system prune.',
         msgCritical: 'Failed to connect to the server core system.',
-        btnYes: 'Yes, Clean Up',
-        btnNo: 'Cancel',
-        btnOk: 'Got It'
+        btnYes: 'Yes, Clean Up', btnNo: 'Cancel', btnOk: 'Got It'
     }
 };
 
@@ -90,47 +88,36 @@ function showCustomPopup({ type, title, message, onConfirm = null }) {
     else if (type === 'success') { iconBox.classList.add('success'); iconBox.innerHTML = '<i class="fa-solid fa-circle-check"></i>'; }
     else if (type === 'error') { iconBox.classList.add('error'); iconBox.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>'; }
 
-    titleBox.innerText = title;
-    msgBox.innerText = message;
-    btnBox.innerHTML = '';
+    titleBox.innerText = title; msgBox.innerText = message; btnBox.innerHTML = '';
 
     if (onConfirm) {
-        const yesBtn = document.createElement('button');
-        yesBtn.className = 'btn-pop-confirm';
-        yesBtn.innerText = l.btnYes;
-        yesBtn.onclick = () => { overlay.classList.remove('active'); onConfirm(); };
-
-        const noBtn = document.createElement('button');
-        noBtn.className = 'btn-pop-cancel';
-        noBtn.innerText = l.btnNo;
-        noBtn.onclick = () => overlay.classList.remove('active');
-
-        btnBox.appendChild(noBtn);
-        btnBox.appendChild(yesBtn);
+        const yesBtn = document.createElement('button'); yesBtn.className = 'btn-pop-confirm'; yesBtn.innerText = l.btnYes; yesBtn.onclick = () => { overlay.classList.remove('active'); onConfirm(); };
+        const noBtn = document.createElement('button'); noBtn.className = 'btn-pop-cancel'; noBtn.innerText = l.btnNo; noBtn.onclick = () => overlay.classList.remove('active');
+        btnBox.appendChild(noBtn); btnBox.appendChild(yesBtn);
     } else {
-        const okBtn = document.createElement('button');
-        okBtn.className = 'btn-pop-confirm';
-        okBtn.innerText = l.btnOk;
-        okBtn.onclick = () => overlay.classList.remove('active');
+        const okBtn = document.createElement('button'); okBtn.className = 'btn-pop-confirm'; okBtn.innerText = l.btnOk; okBtn.onclick = () => overlay.classList.remove('active');
         btnBox.appendChild(okBtn);
     }
-
     overlay.classList.add('active');
 }
 
-function applyLanguage(lang, count = 0) {
+function applyLanguage(lang) {
     currentLang = lang;
     const l = dictionary[lang];
-    
     document.getElementById('btn-cockpit').innerHTML = l.cockpitBtn;
     document.getElementById('txt-chart-title').innerHTML = l.chartTitle;
     document.getElementById('txt-lbl-cpu').innerText = l.lblCpu;
     document.getElementById('txt-lbl-ram').innerText = l.lblRam;
     document.getElementById('txt-lbl-uptime').innerText = l.lblUptime;
     document.getElementById('txt-lbl-temp').innerText = l.lblTemp;
-    document.getElementById('txt-rack-title').innerHTML = l.rackTitle.replace('$count', count);
-    document.getElementById('btn-purge').innerHTML = l.purgeBtn;
     
+    // Perbarui judul dasar seksi tanpa merusak elemen jumlah (span)
+    const sysText = document.getElementById('sys-count').outerHTML;
+    document.getElementById('txt-sys-title').innerHTML = `${l.sysTitle} ${sysText}`;
+    const dockerText = document.getElementById('docker-count').outerHTML;
+    document.getElementById('txt-docker-title').innerHTML = `${l.dockerTitle} ${dockerText}`;
+    
+    document.getElementById('btn-purge').innerHTML = `<i class="fa-solid fa-broom"></i> ${l.purgeBtn.replace('<i class="fa-solid fa-broom"></i> ', '')}`;
     document.getElementById('txt-modal-title').innerText = l.modalTitle;
     document.getElementById('txt-sec-identity').innerText = l.secIdentity;
     document.getElementById('txt-lbl-title-input').innerText = l.lblTitleInput;
@@ -148,18 +135,8 @@ function applyLanguage(lang, count = 0) {
 
 const cpuChart = new Chart(ctx, {
     type: 'line',
-    data: {
-        labels: [],
-        datasets: [{ label: 'CPU', data: [], borderColor: '#00ffcc', backgroundColor: 'rgba(0, 255, 204, 0.01)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0 }]
-    },
-    options: { 
-        responsive: true, 
-        plugins: { legend: { display: false } }, 
-        scales: { 
-            x: { display: false }, 
-            y: { min: 0, max: 100, grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 11 } } } 
-        } 
-    }
+    data: { labels: [], datasets: [{ label: 'CPU', data: [], borderColor: '#00ffcc', backgroundColor: 'rgba(0, 255, 204, 0.01)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0 }] },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { min: 0, max: 100, grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 11 } } } } }
 });
 
 async function fetchData() {
@@ -177,24 +154,13 @@ async function fetchData() {
         document.getElementById('card-temp').style.display = data.config.showTemp ? 'flex' : 'none';
         
         maxChartPoints = data.config.chartPoints;
-
-        const finalTitle = data.config.mainTitle || "Sistem Pusat Kendali";
-        const finalHost = data.config.hostTag || "STB-SERVER";
-        document.getElementById('main-app-logo').innerHTML = `${finalTitle} <span id="main-app-host">${finalHost}</span>`;
+        document.getElementById('main-app-logo').innerHTML = `${data.config.mainTitle || "Sistem Pusat Kendali"} <span id="main-app-host">${data.config.hostTag || "STB-SERVER"}</span>`;
         
-        const countMatch = document.getElementById('txt-rack-title').innerText.match(/\d+/);
-        const currentCount = countMatch ? countMatch[0] : 0;
-        
-        applyLanguage(data.config.lang || 'id', currentCount);
+        applyLanguage(data.config.lang || 'id');
 
         const time = new Date().toLocaleTimeString();
-        while (cpuChart.data.labels.length >= maxChartPoints) {
-            cpuChart.data.labels.shift();
-            cpuChart.data.datasets[0].data.shift();
-        }
-        cpuChart.data.labels.push(time);
-        cpuChart.data.datasets[0].data.push(data.cpuUsage);
-        cpuChart.update('none');
+        while (cpuChart.data.labels.length >= maxChartPoints) { cpuChart.data.labels.shift(); cpuChart.data.datasets[0].data.shift(); }
+        cpuChart.data.labels.push(time); cpuChart.data.datasets[0].data.push(data.cpuUsage); cpuChart.update('none');
     } catch (e) { console.log("Sambungan telemetri terputus."); }
 }
 
@@ -203,67 +169,69 @@ async function updateContainersMonitor() {
         const res = await fetch('/api/services');
         const services = await res.json();
         
+        document.getElementById('sys-count').innerText = `(${services.system.length})`;
+        document.getElementById('docker-count').innerText = `(${services.docker.length})`;
+
+        const sysBox = document.getElementById('system-services-container');
+        const dockerBox = document.getElementById('docker-services-container');
+        
+        sysBox.innerHTML = '';
+        dockerBox.innerHTML = '';
         const l = dictionary[currentLang];
-        document.getElementById('txt-rack-title').innerHTML = l.rackTitle.replace('$count', services.length);
 
-        const containerBox = document.getElementById('containers-container');
-        containerBox.innerHTML = '';
-
-        if(services.length === 0) {
-            containerBox.innerHTML = `<p style="color: #9ca3af; font-size: 14px; padding: 15px; text-align: center;">${l.rackEmpty}</p>`;
-            return;
+        // Render Rak System Armbian
+        if(services.system.length === 0) {
+            sysBox.innerHTML = `<p style="color: #9ca3af; font-size: 13px; padding: 15px; text-align: center;">${l.rackEmpty}</p>`;
+        } else {
+            services.system.forEach(s => sysBox.innerHTML += createBladeHtml(s));
         }
 
-        services.forEach(s => {
-            const isRunning = s.state === 'running';
-            const ledClass = isRunning ? 'led-active' : 'led-offline';
-            const statusColor = isRunning ? '#00ffcc' : '#f87171';
-            const statusBg = isRunning ? 'rgba(0, 255, 204, 0.05)' : 'rgba(248, 113, 113, 0.05)';
-            const statusText = isRunning ? (currentLang === 'id' ? 'Aktif' : 'Active') : (currentLang === 'id' ? 'Berhenti' : 'Stopped');
-            
-            const typeIcon = s.type === 'system' ? '<i class="fa-solid fa-linux"></i>' : '<i class="fa-solid fa-ethernet"></i>';
-
-            containerBox.innerHTML += `
-                <div class="server-blade">
-                    <div class="blade-left">
-                        <div class="led-panel"><div class="led ${ledClass}"></div></div>
-                        <div class="blade-details">
-                            <h4>${s.name} ${s.type === 'system' ? '<span style="font-size:10px; color:#38bdf8; border:1px solid #38bdf8; padding:1px 4px; border-radius:4px; margin-left:6px;">OS</span>' : ''}</h4>
-                            <p>ID: ${s.id} | Base: ${s.image}</p>
-                        </div>
-                    </div>
-                    <div class="blade-network">${typeIcon} Port: ${s.ports}</div>
-                    <div class="blade-status-text" style="color: ${statusColor}; background: ${statusBg};">
-                        ${statusText}
-                    </div>
-                </div>`;
-        });
+        // Render Rak Docker
+        if(services.docker.length === 0) {
+            dockerBox.innerHTML = `<p style="color: #9ca3af; font-size: 13px; padding: 15px; text-align: center;">${l.rackEmpty}</p>`;
+        } else {
+            services.docker.forEach(s => dockerBox.innerHTML += createBladeHtml(s));
+        }
     } catch (err) { console.log("Gagal menyinkronkan daftar aplikasi."); }
+}
+
+function createBladeHtml(s) {
+    const isRunning = s.state === 'running';
+    const ledClass = isRunning ? 'led-active' : 'led-offline';
+    const statusColor = isRunning ? '#00ffcc' : '#f87171';
+    const statusBg = isRunning ? 'rgba(0, 255, 204, 0.05)' : 'rgba(248, 113, 113, 0.05)';
+    const statusText = isRunning ? (currentLang === 'id' ? 'Aktif' : 'Active') : (currentLang === 'id' ? 'Berhenti' : 'Stopped');
+    
+    return `
+        <div class="server-blade">
+            <div class="blade-left">
+                <div class="led ${ledClass}"></div>
+                <div class="blade-details">
+                    <h4>${s.name}</h4>
+                    <p>ID: ${s.id} | Base: ${s.image}</p>
+                </div>
+            </div>
+            <div class="blade-network">Port: ${s.ports}</div>
+            <div class="blade-status-text" style="color: ${statusColor}; background: ${statusBg};">
+                ${statusText}
+            </div>
+        </div>`;
 }
 
 function pruneContainers() {
     const l = dictionary[currentLang];
     showCustomPopup({
-        type: 'warn',
-        title: l.popConfirmTitle,
-        message: l.confirmPurge,
+        type: 'warn', title: l.popConfirmTitle, message: l.confirmPurge,
         onConfirm: async () => {
             try {
                 const res = await fetch('/api/containers/prune', { method: 'POST' });
                 const result = await res.json();
                 if (result.success) {
-                    if (result.message > 0) {
-                        showCustomPopup({ type: 'success', title: l.popSuccessTitle, message: l.msgSuccess.replace('$count', result.message) });
-                    } else {
-                        showCustomPopup({ type: 'success', title: l.popCleanTitle, message: l.msgClean });
-                    }
+                    if (result.message > 0) { showCustomPopup({ type: 'success', title: l.popSuccessTitle, message: l.msgSuccess.replace('$count', result.message) }); }
+                    else { showCustomPopup({ type: 'success', title: l.popCleanTitle, message: l.msgClean }); }
                     updateContainersMonitor();
-                } else {
-                    showCustomPopup({ type: 'error', title: l.popErrorTitle, message: l.msgError });
-                }
-            } catch (err) {
-                showCustomPopup({ type: 'error', title: l.popErrorTitle, message: l.msgCritical });
-            }
+                } else { showCustomPopup({ type: 'error', title: l.popErrorTitle, message: l.msgError }); }
+            } catch (err) { showCustomPopup({ type: 'error', title: l.popErrorTitle, message: l.msgCritical }); }
         }
     });
 }
@@ -288,19 +256,13 @@ async function toggleSettingsModal(show) {
 document.getElementById('settingsForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const configData = {
-        showCpu: document.getElementById('set-showCpu').checked,
-        showRam: document.getElementById('set-showRam').checked,
-        showUptime: document.getElementById('set-showUptime').checked,
-        showTemp: document.getElementById('set-showTemp').checked,
-        chartPoints: parseInt(document.getElementById('set-chartPoints').value) || 20,
-        lang: document.getElementById('set-lang').value,
-        mainTitle: document.getElementById('set-mainTitle').value.trim(),
-        hostTag: document.getElementById('set-hostTag').value.trim()
+        showCpu: document.getElementById('set-showCpu').checked, showRam: document.getElementById('set-showRam').checked,
+        showUptime: document.getElementById('set-showUptime').checked, showTemp: document.getElementById('set-showTemp').checked,
+        chartPoints: parseInt(document.getElementById('set-chartPoints').value) || 20, lang: document.getElementById('set-lang').value,
+        mainTitle: document.getElementById('set-mainTitle').value.trim(), hostTag: document.getElementById('set-hostTag').value.trim()
     };
     await fetch('/api/settings/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(configData) });
-    toggleSettingsModal(false);
-    fetchData();
-    setTimeout(updateContainersMonitor, 500);
+    toggleSettingsModal(false); fetchData(); setTimeout(updateContainersMonitor, 500);
 });
 
 setInterval(fetchData, 2000);

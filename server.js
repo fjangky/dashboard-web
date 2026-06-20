@@ -10,17 +10,10 @@ const app = express();
 const PORT = 3080;
 const CONFIG_FILE = path.join(__dirname, 'config.json');
 
-// Inisialisasi file konfigurasi jika belum ada
 if (!fs.existsSync(CONFIG_FILE)) {
     fs.writeFileSync(CONFIG_FILE, JSON.stringify({ 
-        showCpu: true, 
-        showRam: true, 
-        showUptime: true, 
-        showTemp: true, 
-        chartPoints: 20, 
-        lang: 'id',
-        mainTitle: "Sistem Pusat Kendali", 
-        hostTag: "STB-SERVER"
+        showCpu: true, showRam: true, showUptime: true, showTemp: true, chartPoints: 20, lang: 'id',
+        mainTitle: "Sistem Pusat Kendali", hostTag: "STB-SERVER"
     }, null, 2));
 }
 
@@ -29,9 +22,7 @@ function writeConfig(config) { fs.writeFileSync(CONFIG_FILE, JSON.stringify(conf
 
 app.use(express.json());
 
-app.get('/', (req, res) => { 
-    res.sendFile(path.join(__dirname, 'public', 'dashboard.html')); 
-});
+app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'dashboard.html')); });
 
 app.get('/api/stats', async (req, res) => {
     try {
@@ -48,32 +39,27 @@ app.get('/api/stats', async (req, res) => {
 });
 
 app.get('/api/settings', (req, res) => { res.json({ config: readConfig() }); });
-
 app.post('/api/settings/config', (req, res) => {
     const { showCpu, showRam, showUptime, showTemp, chartPoints, lang, mainTitle, hostTag } = req.body;
     writeConfig({ 
-        showCpu: showCpu === true, 
-        showRam: showRam === true, 
-        showUptime: showUptime === true, 
-        showTemp: showTemp === true, 
-        chartPoints: parseInt(chartPoints) || 20, 
-        lang: lang === 'en' ? 'en' : 'id',
-        mainTitle: mainTitle || "Sistem Pusat Kendali", 
-        hostTag: hostTag || "STB-SERVER"
+        showCpu: showCpu === true, showRam: showRam === true, showUptime: showUptime === true, showTemp: showTemp === true, 
+        chartPoints: parseInt(chartPoints) || 20, lang: lang === 'en' ? 'en' : 'id',
+        mainTitle: mainTitle || "Sistem Pusat Kendali", hostTag: hostTag || "STB-SERVER"
     });
     res.json({ success: true });
 });
 
-// Endpoint Otomatis: Mencari Port, ID, dan Base secara dinamis
+// Endpoint Terpisah: Mengirimkan dua objek data terpisah (system & docker)
 app.get('/api/services', async (req, res) => {
-    const servicesList = [];
+    const systemServices = [];
+    const dockerServices = [];
 
-    // 1. Deteksi otomatis aaPanel (Aplikasi Sistem Native Armbian)
+    // 1. Deteksi otomatis aaPanel (Armbian Native)
     const checkAapanel = () => {
         return new Promise((resolve) => {
             exec('ss -tuln | grep :81', (err, stdout) => {
                 const isRunning = stdout.includes(':81');
-                servicesList.push({
+                systemServices.push({
                     id: "ARMBIAN-SYS",
                     name: "aaPanel Control Panel",
                     image: "Native Service",
@@ -89,38 +75,26 @@ app.get('/api/services', async (req, res) => {
     try {
         await checkAapanel();
 
-        // 2. Ambil data kontainer dari Docker secara otomatis
+        // 2. Deteksi otomatis kontainer Docker
         const containers = await docker.listContainers({ all: true });
-        
         containers.forEach(c => {
-            // Mengambil daftar port secara dinamis dan bersih (Contoh: "8080->80" atau "3306")
-            const portMap = c.Ports.map(p => {
-                if (p.PublicPort) {
-                    return `${p.PublicPort}:${p.PrivatePort}`; // Port luar ke port dalam kontainer
-                }
-                return p.PrivatePort; // Hanya port internal jika tidak di-publish luar
-            });
-            
-            // Gabungkan array port menjadi string, hapus duplikasi jika ada
+            const portMap = c.Ports.map(p => p.PublicPort ? `${p.PublicPort}:${p.PrivatePort}` : p.PrivatePort);
             const finalPorts = [...new Set(portMap)].join(', ') || 'No Port';
-
-            // Bersihkan nama base image yang panjang (Hapus hash sha256 jika ada)
             const cleanImageName = c.Image.startsWith('sha256:') ? 'Custom Image' : c.Image;
 
-            servicesList.push({ 
-                id: c.Id.substring(0, 12),              // Otomatis mengambil 12 Karakter Pertama ID Kontainer
-                name: c.Names[0].replace(/^\//, ''),    // Otomatis mengambil Nama Kontainer (membersihkan tanda /)
-                image: cleanImageName,                  // Otomatis mengambil Base Image yang dipakai
-                state: c.State,                         // Otomatis mendeteksi status running/stopped
-                ports: finalPorts,                      // Otomatis memetakan port yang digunakan
+            dockerServices.push({ 
+                id: c.Id.substring(0, 12), 
+                name: c.Names[0].replace(/^\//, ''), 
+                image: cleanImageName, 
+                state: c.State, 
+                ports: finalPorts,
                 type: "docker"
             });
         });
 
-        res.json(servicesList);
+        res.json({ system: systemServices, docker: dockerServices });
     } catch (err) {
-        // Jika Docker mengalami kendala, dashboard tetap menampilkan aaPanel
-        res.json(servicesList);
+        res.json({ system: systemServices, docker: dockerServices });
     }
 });
 
