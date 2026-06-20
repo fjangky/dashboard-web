@@ -9,8 +9,9 @@ const app = express();
 const PORT = 3000;
 const CONFIG_FILE = path.join(__dirname, 'config.json');
 
+// Default config ditambah variabel lang
 if (!fs.existsSync(CONFIG_FILE)) {
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify({ showCpu: true, showRam: true, showUptime: true, showTemp: true, chartPoints: 20 }, null, 2));
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify({ showCpu: true, showRam: true, showUptime: true, showTemp: true, chartPoints: 20, lang: 'id' }, null, 2));
 }
 
 function readConfig() { return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8')); }
@@ -34,19 +35,20 @@ app.get('/api/stats', async (req, res) => {
             temperature: currentTemp, 
             config: readConfig() 
         });
-    } catch (e) { res.status(500).json({ error: "Gagal memproses data hardware" }); }
+    } catch (e) { res.status(500).json({ error: "Gagal memproses data" }); }
 });
 
 // API Get & Save Config
 app.get('/api/settings', (req, res) => { res.json({ config: readConfig() }); });
 app.post('/api/settings/config', (req, res) => {
-    const { showCpu, showRam, showUptime, showTemp, chartPoints } = req.body;
+    const { showCpu, showRam, showUptime, showTemp, chartPoints, lang } = req.body;
     writeConfig({ 
         showCpu: showCpu === true, 
         showRam: showRam === true, 
         showUptime: showUptime === true, 
         showTemp: showTemp === true, 
-        chartPoints: parseInt(chartPoints) || 20 
+        chartPoints: parseInt(chartPoints) || 20,
+        lang: lang === 'en' ? 'en' : 'id'
     });
     res.json({ success: true });
 });
@@ -70,17 +72,17 @@ app.get('/api/containers', async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Docker offline" }); }
 });
 
-// API: Pembersih kontainer mati yang tidak digunakan
+// API Prune Containers
 app.post('/api/containers/prune', async (req, res) => {
     try {
         const data = await docker.pruneContainers();
         const deletedCount = data.ContainersDeleted ? data.ContainersDeleted.length : 0;
         res.json({ 
             success: true, 
-            message: `Berhasil membersihkan sistem! ${deletedCount} kontainer mati telah dihapus.` 
+            message: deletedCount 
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: "Gagal melakukan pembersihan Docker." });
+        res.status(500).json({ success: false });
     }
 });
 

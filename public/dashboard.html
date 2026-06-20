@@ -3,96 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CloudOS - Monitoring Dashboard</title>
+    <title>Mainframe Monitoring - STB Server</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-        body { background: radial-gradient(circle at top right, #1e222b, #0f1115); color: white; min-height: 100vh; padding: 30px; display: flex; flex-direction: column; gap: 35px; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 0 10px; }
-        .logo { font-size: 24px; font-weight: bold; letter-spacing: -1px; }
-        .logo span { color: #3b82f6; }
-        .btn { border: none; padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
-        .settings-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; }
-        .settings-btn:hover { background: rgba(255,255,255,0.12); }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background-color: #06080c; 
+            background-image: 
+                linear-gradient(rgba(18, 24, 38, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(18, 24, 38, 0.5) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #00ffcc; 
+            font-family: 'Share Tech Mono', monospace; 
+            min-height: 100vh; 
+            padding: 25px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 25px; 
+        }
+
+        /* HEADER SECTION */
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 2px solid #1e293b; 
+            padding-bottom: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .logo { 
+            font-family: 'Orbitron', sans-serif; 
+            font-size: 26px; 
+            font-weight: 800; 
+            letter-spacing: 2px; 
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+        }
+        .logo span { color: #00ffcc; text-shadow: 0 0 15px #00ffcc; }
         
-        .prune-btn { background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; font-size: 12px; padding: 6px 12px; }
-        .prune-btn:hover { background: rgba(239, 68, 68, 0.4); color: #fff; }
+        .btn { 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 4px; 
+            font-family: 'Orbitron', sans-serif; 
+            font-size: 12px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .settings-btn { 
+            background: rgba(0, 255, 204, 0.05); 
+            border: 1px solid #00ffcc; 
+            color: #00ffcc; 
+            box-shadow: inset 0 0 8px rgba(0,255,204,0.1);
+        }
+        .settings-btn:hover { 
+            background: #00ffcc; 
+            color: #06080c; 
+            box-shadow: 0 0 15px #00ffcc;
+        }
+        
+        .prune-btn { 
+            background: rgba(255, 0, 85, 0.1); 
+            border: 1px solid #ff0055; 
+            color: #ff0055; 
+        }
+        .prune-btn:hover { 
+            background: #ff0055; 
+            color: white; 
+            box-shadow: 0 0 15px #ff0055; 
+        }
 
-        .main-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; align-items: start; }
-        .status-sidebar { display: flex; flex-direction: column; gap: 20px; }
-        .card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); backdrop-filter: blur(16px); border-radius: 16px; padding: 25px; }
-        .card h3 { font-size: 12px; color: #9ca3af; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.5px; }
-        .card .value { font-size: 32px; font-weight: bold; }
-        .card .value span { font-size: 16px; color: #9ca3af; }
-        .chart-container { min-height: 440px; display: flex; flex-direction: column; justify-content: space-between; }
-        canvas { width: 100% !important; height: 340px !important; }
+        /* MAIN LAYOUT */
+        .main-layout { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 25px; align-items: start; }
+        .status-sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        .card { 
+            background: rgba(10, 15, 26, 0.85); 
+            border: 1px solid #1e293b; 
+            border-radius: 8px; 
+            padding: 20px; 
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #1e293b;
+        }
+        
+        /* GLOWING CARD BORDERS FOR SCI-FI EFFECT */
+        #card-cpu { border-color: rgba(0, 255, 204, 0.3); } #card-cpu::before { background: #00ffcc; }
+        #card-ram { border-color: rgba(255, 0, 255, 0.3); } #card-ram::before { background: #ff00ff; }
+        #card-uptime { border-color: rgba(255, 204, 0, 0.3); } #card-uptime::before { background: #ffcc00; }
+        #card-temp { border-color: rgba(255, 51, 51, 0.3); } #card-temp::before { background: #ff3333; }
 
+        .card h3 { 
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px; 
+            color: #94a3b8; 
+            text-transform: uppercase; 
+            margin-bottom: 10px; 
+            letter-spacing: 1px; 
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card .value { font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 800; color: #ffffff; }
+        .card .value span { font-size: 16px; font-family: 'Share Tech Mono', monospace; color: #94a3b8; }
+        
+        .chart-container { display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(0, 255, 204, 0.2); }
+        canvas { width: 100% !important; height: 260px !important; }
+
+        /* RACK SERVER AESTHETIC FOR CONTAINERS */
         .monitor-section { width: 100%; }
-        .monitor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .monitor-section h2 { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-        .monitor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .app-card { display: flex; flex-direction: column; justify-content: space-between; min-height: 140px; }
-        .app-info { display: flex; gap: 15px; align-items: flex-start; }
-        .app-icon-box { width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); display: flex; justify-content: center; align-items: center; font-size: 20px; color: #3b82f6; }
-        .app-details h4 { font-size: 16px; margin-bottom: 4px; color: #f3f4f6; text-transform: capitalize; }
-        .app-details p { font-size: 12px; color: #9ca3af; line-height: 1.4; word-break: break-all; margin-bottom: 5px; }
-        .status-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
-        .status-running { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
-        .status-stopped { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .monitor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .monitor-section h2 { font-family: 'Orbitron', sans-serif; font-size: 16px; color: #ffffff; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; }
+        
+        /* RACK ENCLOSURE CABINET */
+        .monitor-rack { 
+            background: #020406; 
+            border: 3px solid #111827; 
+            border-left: 6px solid #1f2937;
+            border-right: 6px solid #1f2937;
+            border-radius: 6px; 
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.9);
+        }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: all 0.25s ease; z-index: 100; }
+        /* INDIVIDUAL BLADE SERVER IN THE RACK */
+        .server-blade { 
+            background: linear-gradient(90deg, #0f172a 0%, #090d16 100%); 
+            border: 1px solid #334155; 
+            border-radius: 4px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+        .server-blade::after {
+            content: ''; position: absolute; right: 4px; top: 25%; width: 2px; height: 50%; background: rgba(255,255,255,0.05);
+        }
+        .blade-left { display: flex; align-items: center; gap: 20px; width: 65%; }
+        
+        /* LED LIGHTS SYSTEM */
+        .led-panel { display: flex; gap: 6px; align-items: center; }
+        .led { width: 8px; height: 8px; border-radius: 50%; background: #334155; transition: all 0.3s; }
+        
+        .led-active { 
+            background: #00ffcc; 
+            box-shadow: 0 0 10px #00ffcc; 
+            animation: blink 1.5s infinite alternate;
+        }
+        .led-offline { 
+            background: #ff0055; 
+            box-shadow: 0 0 10px #ff0055; 
+        }
+
+        @keyframes blink {
+            0% { opacity: 0.4; } 100% { opacity: 1; }
+        }
+
+        .blade-details h4 { font-family: 'Orbitron', sans-serif; font-size: 15px; color: #ffffff; letter-spacing: 0.5px; }
+        .blade-details p { font-size: 11px; color: #64748b; margin-top: 2px; font-family: 'Share Tech Mono', monospace; }
+        
+        .blade-network { font-size: 13px; color: #00ffcc; width: 20%; text-align: right; }
+        .blade-status-text { font-family: 'Orbitron', sans-serif; font-size: 10px; padding: 2px 6px; border: 1px solid #334155; border-radius: 3px; background: rgba(0,0,0,0.3); }
+
+        /* MODAL COCKPIT */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: all 0.25s ease; z-index: 100; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal { background: #14171e; border: 1px solid rgba(255,255,255,0.08); width: 90%; max-width: 460px; border-radius: 16px; padding: 30px; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;}
-        .close-modal { background: none; border: none; color: #9ca3af; font-size: 24px; cursor: pointer; }
-        .setting-section { margin-bottom: 20px; }
+        .modal { background: #090d16; border: 2px solid #00ffcc; width: 90%; max-width: 420px; border-radius: 8px; padding: 25px; box-shadow: 0 0 30px rgba(0, 255, 204, 0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-family: 'Orbitron', sans-serif;}
+        .close-modal { background: none; border: none; color: #ff0055; font-size: 24px; cursor: pointer; }
+        .setting-section h4 { color: #94a3b8; font-size: 12px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px dashed #1e293b; padding-bottom: 4px;}
         .toggle-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px; }
-        .save-btn { background: #3b82f6; color: white; width: 100%; padding: 12px; border-radius: 8px; }
-        @media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } .chart-container { min-height: auto; } canvas { height: 200px !important; } }
+        .save-btn { background: #00ffcc; color: #06080c; width: 100%; padding: 12px; border-radius: 4px; margin-top: 15px; font-weight: bold; }
+        
+        .select-input {
+            width: 110px; background: #000; border: 1px solid #00ffcc; color: #00ffcc; padding: 5px; border-radius: 4px; font-family: 'Share Tech Mono';
+        }
+
+        @media (max-width: 900px) { 
+            .main-layout { grid-template-columns: 1fr; } 
+            .status-sidebar { grid-template-columns: 1fr 1fr; } 
+            .blade-left { width: 50%; } .blade-network { width: 35%; }
+        }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div class="logo">Cloud<span>Monitor</span></div>
-    <button class="btn settings-btn" onclick="toggleSettingsModal(true)"><i class="fa-solid fa-sliders"></i> Pengaturan</button>
+    <div class="logo">MAINFRAME//<span>STB-NODE01</span></div>
+    <button class="btn settings-btn" id="btn-cockpit" onclick="toggleSettingsModal(true)"><i class="fa-solid fa-terminal"></i> COCKPIT SYS</button>
 </div>
 
 <div class="main-layout">
     <div class="card chart-container">
-        <h3>Real-time Processor Trend</h3>
+        <h3 id="txt-chart-title"><i class="fa-solid fa-chart-line"></i> REAL-TIME TELEMETRY STREAM</h3>
         <canvas id="cpuChart"></canvas>
     </div>
     <div class="status-sidebar">
-        <div class="card" id="card-cpu"><h3><i class="fa-solid fa-microchip" style="color: #3b82f6;"></i> CPU Load</h3><div class="value" id="cpu-text">0<span>%</span></div></div>
-        <div class="card" id="card-ram"><h3><i class="fa-solid fa-memory" style="color: #a855f7;"></i> Memory Usage</h3><div class="value" id="ram-text">0<span>%</span></div></div>
-        <div class="card" id="card-uptime"><h3><i class="fa-solid fa-clock" style="color: #eab308;"></i> System Uptime</h3><div class="value" id="uptime-text">0<span>s</span></div></div>
-        <div class="card" id="card-temp"><h3><i class="fa-solid fa-temperature-half" style="color: #ef4444;"></i> Core Temp</h3><div class="value" id="temp-text">0<span>°C</span></div></div>
+        <div class="card" id="card-cpu"><h3 id="txt-lbl-cpu"><i class="fa-solid fa-microchip"></i> CPU CORE LOAD</h3><div class="value" id="cpu-text">0<span>%</span></div></div>
+        <div class="card" id="card-ram"><h3 id="txt-lbl-ram"><i class="fa-solid fa-memory"></i> VIRTUAL RAM</h3><div class="value" id="ram-text">0<span>%</span></div></div>
+        <div class="card" id="card-uptime"><h3 id="txt-lbl-uptime"><i class="fa-solid fa-clock"></i> NODE UPTIME</h3><div class="value" id="uptime-text">0<span>s</span></div></div>
+        <div class="card" id="card-temp"><h3 id="txt-lbl-temp"><i class="fa-solid fa-temperature-half"></i> THERMAL SENSOR</h3><div class="value" id="temp-text">0<span>°C</span></div></div>
     </div>
 </div>
 
 <div class="monitor-section">
     <div class="monitor-header">
-        <h2><i class="fa-solid fa-cubes" style="color: #a855f7;"></i> Active Docker Containers (<span id="container-count">0</span>)</h2>
-        <button class="btn prune-btn" onclick="pruneContainers()"><i class="fa-solid fa-broom"></i> Bersihkan Kontainer Mati</button>
+        <h2 id="txt-rack-title"><i class="fa-solid fa-server"></i> MAINFRAME CONTAINER RACK CABINET (<span id="container-count">0</span> BLADES)</h2>
+        <button class="btn prune-btn" id="btn-purge" onclick="pruneContainers()"><i class="fa-solid fa-broom"></i> PURGE DEAD BLADES</button>
     </div>
-    <div class="monitor-grid" id="containers-container"></div>
+    <div class="monitor-rack" id="containers-container"></div>
 </div>
 
 <div class="modal-overlay" id="settingsModal">
     <div class="modal">
-        <div class="modal-header"><h2><i class="fa-solid fa-gear"></i> Control Center</h2><button class="close-modal" onclick="toggleSettingsModal(false)">&times;</button></div>
+        <div class="modal-header"><h2 id="txt-modal-title">// SYSTEM CONFIG</h2><button class="close-modal" onclick="toggleSettingsModal(false)">&times;</button></div>
         <form id="settingsForm">
-            <div class="setting-section">
-                <h4>Dashboard Layout Modules</h4>
-                <div class="toggle-group"><label>Tampilkan Status CPU</label><input type="checkbox" id="set-showCpu"></div>
-                <div class="toggle-group"><label>Tampilkan Penggunaan RAM</label><input type="checkbox" id="set-showRam"></div>
-                <div class="toggle-group"><label>Tampilkan Uptime Sistem</label><input type="checkbox" id="set-showUptime"></div>
-                <div class="toggle-group"><label>Tampilkan Suhu Perangkat</label><input type="checkbox" id="set-showTemp"></div>
-                <div class="toggle-group" style="margin-top: 15px;"><label>Maksimal Titik Grafik</label><input type="number" id="set-chartPoints" min="5" max="50" style="width: 60px; background: #000; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 4px; border-radius: 6px; text-align: center;"></div>
+            <div class="setting-section" style="margin-bottom: 20px;">
+                <h4 id="txt-sec-lang">SYSTEM LANGUAGE</h4>
+                <div class="toggle-group">
+                    <label id="txt-lbl-lang">CHOOSE LANGUAGE</label>
+                    <select id="set-lang" class="select-input">
+                        <option value="id">Indonesia</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
             </div>
-            <button type="submit" class="btn save-btn">Terapkan Konfigurasi</button>
+
+            <div class="setting-section">
+                <h4 id="txt-sec-tele">TELEMETRY MODULES</h4>
+                <div class="toggle-group"><label id="txt-opt-cpu">MONITOR CPU STATUS</label><input type="checkbox" id="set-showCpu"></div>
+                <div class="toggle-group"><label id="txt-opt-ram">MONITOR RAM STATUS</label><input type="checkbox" id="set-showRam"></div>
+                <div class="toggle-group"><label id="txt-opt-uptime">MONITOR UPTIME STATUS</label><input type="checkbox" id="set-showUptime"></div>
+                <div class="toggle-group"><label id="txt-opt-temp">MONITOR SENSOR THERMAL</label><input type="checkbox" id="set-showTemp"></div>
+                <div class="toggle-group" style="margin-top: 15px;">
+                    <label id="txt-opt-chart">CHART REFRESH POINTS</label>
+                    <input type="number" id="set-chartPoints" min="5" max="50" class="select-input" style="width: 60px; text-align: center;">
+                </div>
+            </div>
+            <button type="submit" class="btn save-btn" id="btn-save-config">EXECUTE CONFIG</button>
         </form>
     </div>
 </div>
