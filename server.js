@@ -36,13 +36,20 @@ function runCommand(cmd) {
     });
 }
 
-// Logika pemindaian otomatis aplikasi Native OS yang sudah difilter
-async function scanNativeServices(aaPanelPort) {
+// Logika pemantauan aplikasi Native dengan sistem WHITELIST (Hanya menampilkan yang ada di daftar)
+async function scanNativeServices() {
     const stdout = await runCommand('sudo ss -tulpn | grep LISTEN');
     if (!stdout) return [];
 
     const lines = stdout.split('\n');
     const servicesMap = new Map();
+
+    // =============== DAFTAR WHITELIST APLIKASI UTAMA ===============
+    // Tambahkan atau sesuaikan nama proses/aplikasi asli yang HANYA boleh muncul di dashboard Anda.
+    // Ditulis dalam huruf kecil (lowercase) agar pencocokannya akurat.
+    const allowedApps = ['bt', 'aapanel', 'node', 'python']; 
+    // Keterangan: 'bt' biasanya adalah nama proses/service utama milik aaPanel di core Linux.
+    // ===============================================================
 
     lines.forEach(line => {
         const portMatch = line.match(/:([0-9]+)\s+/);
@@ -52,16 +59,12 @@ async function scanNativeServices(aaPanelPort) {
             const port = portMatch[1];
             let procName = processMatch[1];
 
-            // 1. Abaikan proxy internal docker agar tidak duplikat dengan kontainer
-            if (procName === 'docker-proxy') return;
-
-            // 2. FILTER UTAMA: Jika port yang terdeteksi adalah port aaPanel, atau nama prosesnya berkaitan dengan web server bawaan panel (httpd, nginx, php-fpm)
-            // Maka kita abaikan/block agar tidak muncul sebagai aplikasi terpisah di dashboard
-            if (port === aaPanelPort || ['httpd', 'nginx', 'apache2', 'mysqld'].includes(procName.toLowerCase())) {
-                return; 
+            // Jika nama proses tidak ada di dalam daftar whitelist, langsung dilewati (tidak ditampilkan)
+            if (!allowedApps.includes(procName.toLowerCase())) {
+                return;
             }
 
-            // Kelompokkan port layanan native lainnya (misal: SSH, Mosquitto, dll)
+            // Kelompokkan port jika aplikasinya sama
             if (servicesMap.has(procName)) {
                 const existing = servicesMap.get(procName);
                 if (!existing.ports.includes(port)) {
@@ -135,9 +138,8 @@ app.post('/api/settings/config', (req, res) => {
 app.get('/api/services', async (req, res) => {
     let systemServices = [];
     const dockerServices = [];
-    let aaPanelPortActual = "8888"; // Default fallback port
 
-    // Fungsi deteksi aaPanel mandiri
+    // 1. Logika Deteksi Mandiri aaPanel via port.pl (Tetap dipertahankan paling atas)
     const checkAapanel = () => new Promise((resolve) => {
         const portFile = '/www/server/panel/data/port.pl';
         fs.readFile(portFile, 'utf8', (err, data) => {
@@ -146,13 +148,12 @@ app.get('/api/services', async (req, res) => {
                     systemServices.push({
                         id: "SYS-01", name: "aaPanel", image: "Native OS",
                         state: stdout ? "running" : "stopped",
-                        ports: stdout ? "8888" : "N/A", type: "system"
+                        ports: stdout ? "82" : "N/A", type: "system"
                     });
                     resolve();
                 });
             } else {
                 const port = data.trim();
-                aaPanelPortActual = port; // Simpan port asli aaPanel untuk filter nanti
                 exec(`ss -tuln | grep :${port}`, (err3, stdout) => {
                     systemServices.push({
                         id: "SYS-01", name: "aaPanel", image: "Native OS",
@@ -166,15 +167,15 @@ app.get('/api/services', async (req, res) => {
     });
 
     try {
-        // 1. Jalankan deteksi terisolasi aaPanel
+        // Ambil aaPanel utama
         await checkAapanel();
 
-        // 2. Ambil aplikasi native lain dengan menyertakan filter port/nama webserver bawaan aaPanel
-        const autoNative = await scanNativeServices(aaPanelPortActual);
+        // 2. Jalankan scanner aplikasi native lain yang sudah difilter ketat lewat whitelist
+        const autoNative = await scanNativeServices();
         
         autoNative.forEach(service => {
-            // Memastikan duplikasi nama bertema "AAPANEL" dari pemindaian port tidak dimasukkan lagi
-            if (service.name !== 'AAPANEL' && service.name !== 'PANEL') {
+            // Hindari duplikasi jika aaPanel terdeteksi kembali dari pencarian otomatis port terbuka
+            if (service.name !== 'AAPANEL' && service.name !== 'BT') {
                 systemServices.push(service);
             }
         });
