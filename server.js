@@ -45,7 +45,6 @@ async function scanNativeServices() {
     const servicesMap = new Map();
 
     // =============== DAFTAR WHITELIST UTAMA ===============
-    // Hanya proses dengan nama di bawah ini yang diizinkan muncul
     const allowedApps = ['bt', 'aapanel', 'node', 'python', 'casaos']; 
     // ======================================================
 
@@ -140,7 +139,7 @@ app.get('/api/services', async (req, res) => {
     let systemServices = [];
     const dockerServices = [];
 
-    // 1. Ambil data aaPanel (Port 82 / otomatis via port.pl)
+    // 1. Ambil data aaPanel (Otomatis via port.pl)
     const checkAapanel = () => new Promise((resolve) => {
         const portFile = '/www/server/panel/data/port.pl';
         fs.readFile(portFile, 'utf8', (err, data) => {
@@ -167,8 +166,17 @@ app.get('/api/services', async (req, res) => {
         });
     });
 
-    // 2. Ambil data CasaOS secara khusus (Port 81)
+    // 2. Ambil data CasaOS (Hanya jika aplikasinya benar-benar terinstal di sistem)
     const checkCasaOS = () => new Promise((resolve) => {
+        // Cek apakah file binary CasaOS masih ada di sistem Linux
+        const casaosExists = fs.existsSync('/usr/bin/casaos') || fs.existsSync('/usr/local/bin/casaos');
+        
+        if (!casaosExists) {
+            // Jika file tidak ditemukan (sudah di-uninstall), langsung skip dan jangan tampilkan apa-apa
+            return resolve();
+        }
+
+        // Jika file masih ada, cek apakah port 81 sedang aktif berjalan
         exec("ss -tuln | grep :81", (err, stdout) => {
             systemServices.push({
                 id: "SYS-02", name: "CasaOS", image: "Native OS",
@@ -180,20 +188,19 @@ app.get('/api/services', async (req, res) => {
     });
 
     try {
-        // Jalankan deteksi manual untuk aaPanel dan CasaOS agar posisinya rapi di atas
+        // Jalankan pengecekan aplikasi terisolasi
         await checkAapanel();
         await checkCasaOS();
 
-        // 3. Jalankan scanner otomatis aplikasi native tambahan yang lolos whitelist (jika ada)
+        // 3. Scanner aplikasi native tambahan lainnya yang lolos whitelist
         const autoNative = await scanNativeServices();
         autoNative.forEach(service => {
-            // Hindari duplikasi karena aaPanel dan CasaOS sudah dibuatkan barisnya secara manual di atas
             if (!['AAPANEL', 'BT', 'CASAOS'].includes(service.name)) {
                 systemServices.push(service);
             }
         });
 
-        // 4. Ambil data kontainer Docker (Id dan Image tetap dipertahankan)
+        // 4. Ambil data kontainer Docker
         const containers = await docker.listContainers({ all: true });
         containers.forEach(c => {
             const portMap = c.Ports.map(p => p.PublicPort ? `${p.PublicPort}:${p.PrivatePort}` : p.PrivatePort);
