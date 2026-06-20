@@ -153,7 +153,6 @@ function applyLanguage(lang) {
     if (dashboardFooterEl) dashboardFooterEl.innerHTML = l.copyright;
 }
 
-// --- INISIALISASI GRAFIK SECARA AMAN ---
 const cpuChart = ctx ? new Chart(ctx, {
     type: 'line',
     data: { 
@@ -354,37 +353,34 @@ setInterval(updateContainersMonitor, 4000);
 fetchData();
 updateContainersMonitor();
 
-// --- FUNGSI WAKTU REAL-TIME ---
 function updateTime() {
     const now = new Date();
     document.getElementById('live-time').innerText = now.toLocaleTimeString('id-ID', { hour12: false });
 }
 setInterval(updateTime, 1000);
-updateTime(); // Jalankan sekali saat load
+updateTime();
 
-// --- FUNGSI CUACA (Menggunakan IP Geolocation gratis) ---
 async function fetchWeather() {
     const locationEl = document.getElementById('location');
     const tempEl = document.getElementById('temp');
+    if (!locationEl || !tempEl) return;
     try {
-        // Mendapatkan lokasi berdasarkan IP (gratis & tanpa API Key)
         const ipRes = await fetch('https://ipapi.co/json/');
         const ipData = await ipRes.json();
         const city = ipData.city || "Jakarta";
         locationEl.innerText = city;
-        
-        // Menampilkan lokasi
-        document.getElementById('location').innerText = city;
 
-        // Mengambil cuaca dari wttr.in (Sangat ringan untuk STB)
-        const weatherRes = await fetch(`https://wttr.in/${city}?format=%t`);
+        const weatherRes = await fetch(`https://wttr.in/${city}?format=%t`, {
+            headers: { 'User-Agent': 'curl/7.64.1' }
+        });
         const temp = await weatherRes.text();
-        document.getElementById('temp').innerText = temp;
+        // Bersihkan hasil dari karakter non-angka/derajat
+        tempEl.innerText = temp.replace(/[^0-9°C-]/g, '') || "--";
     } catch (err) {
         console.error("Gagal memuat cuaca:", err);
-        document.getElementById('location').innerText = "Lokasi Tidak Diketahui";
+        locationEl.innerText = "N/A";
+        tempEl.innerText = "--";
     }
 }
 fetchWeather();
-// Update cuaca setiap 30 menit
 setInterval(fetchWeather, 1800000);
