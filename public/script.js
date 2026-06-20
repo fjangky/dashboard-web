@@ -144,42 +144,38 @@ function applyLanguage(lang) {
 }
 
 // --- PEMBUATAN GRADASI DAN KONFIGURASI GRAFIK ELEGAN ---
-let gradientLine = ctx.createLinearGradient(0, 0, ctx.canvas.clientWidth, 0);
-gradientLine.addColorStop(0, '#00ffcc'); // Cyan Neon awal
-gradientLine.addColorStop(0.5, '#0284c7'); // Biru Tengah
-gradientLine.addColorStop(1, '#38bdf8'); // Biru Muda Terang di ujung
-
-let gradientFill = ctx.createLinearGradient(0, 0, 0, 220);
-gradientFill.addColorStop(0, 'rgba(0, 255, 204, 0.25)');
-gradientFill.addColorStop(0.4, 'rgba(2, 132, 199, 0.08)');
-gradientFill.addColorStop(1, 'rgba(11, 17, 30, 0)');
-
-const cpuChart = new Chart(ctx, {
+// --- INISIALISASI GRAFIK SECARA AMAN ---
+const cpuChart = ctx ? new Chart(ctx, {
     type: 'line',
     data: { 
         labels: [], 
         datasets: [{ 
             label: 'CPU', 
             data: [], 
-            borderColor: gradientLine, 
-            backgroundColor: gradientFill, 
+            borderColor: '#00ffcc', // Warna solid neon agar aman saat load pertama
+            backgroundColor: function(context) {
+                const chart = context.chart;
+                const {ctx, chartArea} = chart;
+                if (!chartArea) return null;
+                
+                // Membuat gradasi vertikal yang aman dari atas ke bawah
+                const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                gradient.addColorStop(0, 'rgba(0, 255, 204, 0.25)');
+                gradient.addColorStop(0.5, 'rgba(2, 132, 199, 0.08)');
+                gradient.addColorStop(1, 'rgba(11, 17, 30, 0)');
+                return gradient;
+            },
             fill: true, 
-            tension: 0.42, 
+            tension: 0.4, 
             borderWidth: 3, 
             pointRadius: 0,
-            pointHoverRadius: 5,
-            pointHoverBackgroundColor: '#00ffcc',
-            pointHoverBorderColor: '#ffffff',
-            pointHoverBorderWidth: 2
+            pointHoverRadius: 5
         }] 
     },
     options: { 
         responsive: true, 
         maintainAspectRatio: false,
-        animation: {
-            duration: 400,
-            easing: 'linear'
-        },
+        animation: false, // Matikan animasi bawaan agar render real-time super ringan di STB
         plugins: { legend: { display: false } }, 
         scales: { 
             x: { 
@@ -194,7 +190,7 @@ const cpuChart = new Chart(ctx, {
             } 
         } 
     }
-});
+}) : null;
 
 async function fetchData() {
     try {
