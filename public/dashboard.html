@@ -235,6 +235,7 @@
             background: #111827; border: 1px solid #1f2937; 
             width: 90%; max-width: 440px; border-radius: 12px; padding: 28px; 
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            max-height: 85vh; overflow-y: auto;
         }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .modal-header h2 { font-size: 18px; font-weight: 700; color: #ffffff; }
@@ -242,9 +243,11 @@
         .close-modal:hover { color: #f87171; }
         
         .setting-section h4 { color: #38bdf8; font-size: 11px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-        .toggle-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 14px; color: #e2e8f0; }
+        .toggle-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 14px; color: #e2e8f0; gap: 10px; }
         .save-btn { background: #00ffcc; color: #0b111e; width: 100%; padding: 12px; border-radius: 6px; margin-top: 20px; font-weight: 700; font-size: 14px; justify-content: center; }
         .select-input { width: 120px; background: #1f2937; border: 1px solid #374151; color: #ffffff; padding: 6px 10px; border-radius: 6px; font-size: 13px; outline: none; }
+        .text-input { width: 100%; background: #1f2937; border: 1px solid #374151; color: #ffffff; padding: 8px 12px; border-radius: 6px; font-size: 13px; outline: none; transition: border-color 0.2s; }
+        .text-input:focus { border-color: #00ffcc; }
 
         /* POPUP ALERT & CONFIRM KUSTOM */
         .popup-overlay {
@@ -282,7 +285,7 @@
 
 <div class="app-container">
     <div class="header">
-        <div class="logo">Sistem Pusat Kendali <span>STB-SERVER</span></div>
+        <div class="logo" id="main-app-logo">Sistem Pusat Kendali <span id="main-app-host">STB-SERVER</span></div>
         <button class="btn settings-btn" id="btn-cockpit" onclick="toggleSettingsModal(true)"><i class="fa-solid fa-terminal"></i> Pengaturan Sistem</button>
     </div>
 
@@ -312,6 +315,18 @@
     <div class="modal">
         <div class="modal-header"><h2 id="txt-modal-title">Konfigurasi Panel</h2><button class="close-modal" onclick="toggleSettingsModal(false)">&times;</button></div>
         <form id="settingsForm">
+            <div class="setting-section" style="margin-bottom: 20px;">
+                <h4 id="txt-sec-identity">Identitas Perangkat</h4>
+                <div class="toggle-group" style="flex-direction: column; align-items: flex-start;">
+                    <label style="margin-bottom: 5px; font-size: 13px;" id="txt-lbl-title-input">Nama Sistem Utama</label>
+                    <input type="text" id="set-mainTitle" class="text-input" placeholder="Sistem Pusat Kendali">
+                </div>
+                <div class="toggle-group" style="flex-direction: column; align-items: flex-start; margin-top: 10px;">
+                    <label style="margin-bottom: 5px; font-size: 13px;" id="txt-lbl-host-input">Nama Host / Tag</label>
+                    <input type="text" id="set-hostTag" class="text-input" placeholder="STB-SERVER">
+                </div>
+            </div>
+
             <div class="setting-section" style="margin-bottom: 20px;">
                 <h4 id="txt-sec-lang">Bahasa Terpilih</h4>
                 <div class="toggle-group">

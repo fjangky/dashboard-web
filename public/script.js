@@ -2,7 +2,6 @@ const ctx = document.getElementById('cpuChart').getContext('2d');
 let maxChartPoints = 20;
 let currentLang = 'id';
 
-// KUNCI SUKSES: Kamus Multi-Bahasa yang Sudah Disinkronkan Sempurna dengan HTML
 const dictionary = {
     id: {
         cockpitBtn: '<i class="fa-solid fa-gear"></i> Pengaturan Sistem',
@@ -14,6 +13,9 @@ const dictionary = {
         rackTitle: '<i class="fa-solid fa-server"></i> Daftar Layanan Aplikasi ($count Terpasang)',
         purgeBtn: '<i class="fa-solid fa-broom"></i> Bersihkan Aplikasi Mati',
         modalTitle: 'Konfigurasi Panel',
+        secIdentity: 'Identitas Perangkat',
+        lblTitleInput: 'Nama Sistem Utama',
+        lblHostInput: 'Nama Host / Tag',
         secLang: 'Bahasa Terpilih',
         lblLang: 'Pilih Bahasa',
         secTele: 'Modul Pemantauan',
@@ -47,6 +49,9 @@ const dictionary = {
         rackTitle: '<i class="fa-solid fa-server"></i> Application Services List ($count Installed)',
         purgeBtn: '<i class="fa-solid fa-broom"></i> Clear Idle Applications',
         modalTitle: 'Panel Configuration',
+        secIdentity: 'Device Identity',
+        lblTitleInput: 'Main System Title',
+        lblHostInput: 'Host / Tag Name',
         secLang: 'System Language',
         lblLang: 'Choose Language',
         secTele: 'Monitoring Modules',
@@ -72,7 +77,6 @@ const dictionary = {
     }
 };
 
-// ENGINES DIALOG POP-UP MODAL KUSTOM
 function showCustomPopup({ type, title, message, onConfirm = null }) {
     const overlay = document.getElementById('customPopup');
     const iconBox = document.getElementById('pop-icon');
@@ -128,6 +132,9 @@ function applyLanguage(lang, count = 0) {
     document.getElementById('btn-purge').innerHTML = l.purgeBtn;
     
     document.getElementById('txt-modal-title').innerText = l.modalTitle;
+    document.getElementById('txt-sec-identity').innerText = l.secIdentity;
+    document.getElementById('txt-lbl-title-input').innerText = l.lblTitleInput;
+    document.getElementById('txt-lbl-host-input').innerText = l.lblHostInput;
     document.getElementById('txt-sec-lang').innerText = l.secLang;
     document.getElementById('txt-lbl-lang').innerText = l.lblLang;
     document.getElementById('txt-sec-tele').innerText = l.secTele;
@@ -170,8 +177,12 @@ async function fetchData() {
         document.getElementById('card-temp').style.display = data.config.showTemp ? 'flex' : 'none';
         
         maxChartPoints = data.config.chartPoints;
+
+        // Render Teks Dinamis Hasil Input Kustomisasi
+        const finalTitle = data.config.mainTitle || "Sistem Pusat Kendali";
+        const finalHost = data.config.hostTag || "STB-SERVER";
+        document.getElementById('main-app-logo').innerHTML = `${finalTitle} <span id="main-app-host">${finalHost}</span>`;
         
-        // Ambil jumlah kontainer saat ini dari DOM agar tidak reset ke 0 saat interval berjalan
         const countMatch = document.getElementById('txt-rack-title').innerText.match(/\d+/);
         const currentCount = countMatch ? countMatch[0] : 0;
         
@@ -231,7 +242,6 @@ async function updateContainersMonitor() {
 
 function pruneContainers() {
     const l = dictionary[currentLang];
-    
     showCustomPopup({
         type: 'warn',
         title: l.popConfirmTitle,
@@ -242,17 +252,9 @@ function pruneContainers() {
                 const result = await res.json();
                 if (result.success) {
                     if (result.message > 0) {
-                        showCustomPopup({
-                            type: 'success',
-                            title: l.popSuccessTitle,
-                            message: l.msgSuccess.replace('$count', result.message)
-                        });
+                        showCustomPopup({ type: 'success', title: l.popSuccessTitle, message: l.msgSuccess.replace('$count', result.message) });
                     } else {
-                        showCustomPopup({
-                            type: 'success',
-                            title: l.popCleanTitle,
-                            message: l.msgClean
-                        });
+                        showCustomPopup({ type: 'success', title: l.popCleanTitle, message: l.msgClean });
                     }
                     updateContainersMonitor();
                 } else {
@@ -277,6 +279,9 @@ async function toggleSettingsModal(show) {
         document.getElementById('set-showTemp').checked = data.config.showTemp || false;
         document.getElementById('set-chartPoints').value = data.config.chartPoints;
         document.getElementById('set-lang').value = data.config.lang || 'id';
+        // Isi nilai input kustom
+        document.getElementById('set-mainTitle').value = data.config.mainTitle || '';
+        document.getElementById('set-hostTag').value = data.config.hostTag || '';
     } else { modal.classList.remove('active'); }
 }
 
@@ -288,7 +293,9 @@ document.getElementById('settingsForm').addEventListener('submit', async (e) => 
         showUptime: document.getElementById('set-showUptime').checked,
         showTemp: document.getElementById('set-showTemp').checked,
         chartPoints: parseInt(document.getElementById('set-chartPoints').value) || 20,
-        lang: document.getElementById('set-lang').value
+        lang: document.getElementById('set-lang').value,
+        mainTitle: document.getElementById('set-mainTitle').value.trim(),
+        hostTag: document.getElementById('set-hostTag').value.trim()
     };
     await fetch('/api/settings/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(configData) });
     toggleSettingsModal(false);

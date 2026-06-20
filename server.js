@@ -6,11 +6,21 @@ const Docker = require('dockerode');
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 const app = express();
-const PORT = 3080
+const PORT = 3080;
 const CONFIG_FILE = path.join(__dirname, 'config.json');
 
+// Inisialisasi properti baru (mainTitle & hostTag) jika file belum ada
 if (!fs.existsSync(CONFIG_FILE)) {
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify({ showCpu: true, showRam: true, showUptime: true, showTemp: true, chartPoints: 20, lang: 'id' }, null, 2));
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify({ 
+        showCpu: true, 
+        showRam: true, 
+        showUptime: true, 
+        showTemp: true, 
+        chartPoints: 20, 
+        lang: 'id',
+        mainTitle: "Sistem Pusat Kendali",
+        hostTag: "STB-SERVER"
+    }, null, 2));
 }
 
 function readConfig() { return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8')); }
@@ -38,14 +48,18 @@ app.get('/api/stats', async (req, res) => {
 
 app.get('/api/settings', (req, res) => { res.json({ config: readConfig() }); });
 app.post('/api/settings/config', (req, res) => {
-    const { showCpu, showRam, showUptime, showTemp, chartPoints, lang } = req.body;
+    const { showCpu, showRam, showUptime, showTemp, chartPoints, lang, mainTitle, hostTag } = req.body;
+    
+    // Validasi & Simpan data teks kustomisasi ke JSON
     writeConfig({ 
         showCpu: showCpu === true, 
         showRam: showRam === true, 
         showUptime: showUptime === true, 
         showTemp: showTemp === true, 
         chartPoints: parseInt(chartPoints) || 20,
-        lang: lang === 'en' ? 'en' : 'id'
+        lang: lang === 'en' ? 'en' : 'id',
+        mainTitle: mainTitle || "Sistem Pusat Kendali",
+        hostTag: hostTag || "STB-SERVER"
     });
     res.json({ success: true });
 });
