@@ -64,21 +64,21 @@ app.post('/api/settings/config', (req, res) => {
     res.json({ success: true });
 });
 
-// Endpoint Terpadu: Menggabungkan Layanan Armbian (aaPanel) + Docker
+// Endpoint Terpadu: Menggabungkan Layanan Armbian (aaPanel Port 81) + Docker
 app.get('/api/services', async (req, res) => {
     const servicesList = [];
 
-    // 1. Deteksi aaPanel via port 8888 pada sistem Armbian
+    // 1. Deteksi aaPanel via port 81 pada sistem Armbian
     const checkAapanel = () => {
         return new Promise((resolve) => {
-            exec('ss -tuln | grep :8888', (err, stdout) => {
-                const isRunning = stdout.includes(':8888');
+            exec('ss -tuln | grep :81', (err, stdout) => {
+                const isRunning = stdout.includes(':81');
                 servicesList.push({
                     id: "SYS-01",
                     name: "aaPanel Control Panel",
                     image: "Armbian Native Service",
                     state: isRunning ? "running" : "stopped",
-                    ports: "8888",
+                    ports: "81",
                     type: "system"
                 });
                 resolve();
@@ -105,7 +105,7 @@ app.get('/api/services', async (req, res) => {
 
         res.json(servicesList);
     } catch (err) {
-        // Jika Docker offline, tetap kirimkan layanan sistem native yang terdeteksi
+        // Jika Docker offline, tetap kirimkan layanan sistem native yang berhasil didapat
         res.json(servicesList);
     }
 });
