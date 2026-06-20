@@ -3,26 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mainframe Monitoring - STB Server</title>
+    <title>Sistem Pusat Kendali - Dashboard STB</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+        
         body { 
-            background-color: #06080c; 
+            background-color: #0b111e; 
             background-image: 
-                linear-gradient(rgba(18, 24, 38, 0.5) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(18, 24, 38, 0.5) 1px, transparent 1px);
-            background-size: 20px 20px;
-            color: #00ffcc; 
-            font-family: 'Share Tech Mono', monospace; 
+                radial-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 0),
+                radial-gradient(rgba(0, 255, 204, 0.02) 1px, transparent 0);
+            background-size: 24px 24px;
+            background-position: 0 0, 12px 12px;
+            color: #e2e8f0; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
             min-height: 100vh; 
-            padding: 25px; 
+            padding: 30px; 
             display: flex; 
             flex-direction: column; 
             gap: 25px; 
+        }
+
+        /* CONTAINER UTAMA / PEMBATAS HALAMAN */
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
         }
 
         /* HEADER SECTION */
@@ -30,210 +46,376 @@
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            border-bottom: 2px solid #1e293b; 
-            padding-bottom: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border-bottom: 1px solid #1e293b; 
+            padding-bottom: 20px;
         }
         .logo { 
-            font-family: 'Orbitron', sans-serif; 
-            font-size: 26px; 
-            font-weight: 800; 
-            letter-spacing: 2px; 
+            font-size: 22px; 
+            font-weight: 700; 
+            letter-spacing: -0.5px;
             color: #ffffff;
-            text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .logo span { color: #00ffcc; text-shadow: 0 0 15px #00ffcc; }
+        .logo span { 
+            color: #00ffcc; 
+            background: rgba(0, 255, 204, 0.08);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
         
+        /* TOMBOL KUSTOM */
         .btn { 
             border: none; 
-            padding: 10px 20px; 
-            border-radius: 4px; 
-            font-family: 'Orbitron', sans-serif; 
-            font-size: 12px; 
+            padding: 10px 18px; 
+            border-radius: 6px; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 13px; 
             cursor: pointer; 
             font-weight: 600; 
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         .settings-btn { 
             background: rgba(0, 255, 204, 0.05); 
-            border: 1px solid #00ffcc; 
+            border: 1px solid rgba(0, 255, 204, 0.3); 
             color: #00ffcc; 
-            box-shadow: inset 0 0 8px rgba(0,255,204,0.1);
         }
         .settings-btn:hover { 
             background: #00ffcc; 
-            color: #06080c; 
-            box-shadow: 0 0 15px #00ffcc;
+            color: #0b111e; 
+            box-shadow: 0 4px 12px rgba(0, 255, 204, 0.2);
         }
         
         .prune-btn { 
-            background: rgba(255, 0, 85, 0.1); 
-            border: 1px solid #ff0055; 
-            color: #ff0055; 
+            background: rgba(239, 68, 68, 0.1); 
+            border: 1px solid rgba(239, 68, 68, 0.3); 
+            color: #f87171; 
         }
         .prune-btn:hover { 
-            background: #ff0055; 
+            background: #ef4444; 
             color: white; 
-            box-shadow: 0 0 15px #ff0055; 
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); 
         }
 
-        /* MAIN LAYOUT */
-        .main-layout { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 25px; align-items: start; }
-        .status-sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        /* GRID PANEL HARWARE & GRAFIK */
+        .main-layout { 
+            display: grid; 
+            grid-template-columns: 1.5fr 1fr; 
+            gap: 25px; 
+            align-items: stretch; 
+        }
+        
+        .status-sidebar { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px; 
+        }
         
         .card { 
-            background: rgba(10, 15, 26, 0.85); 
-            border: 1px solid #1e293b; 
-            border-radius: 8px; 
-            padding: 20px; 
-            position: relative;
-            overflow: hidden;
+            background: #111827; 
+            border: 1px solid #1f2937; 
+            border-radius: 12px; 
+            padding: 24px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: border-color 0.2s ease;
         }
-        .card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #1e293b;
+        .card:hover {
+            border-color: #374151;
         }
         
-        /* GLOWING CARD BORDERS FOR SCI-FI EFFECT */
-        #card-cpu { border-color: rgba(0, 255, 204, 0.3); } #card-cpu::before { background: #00ffcc; }
-        #card-ram { border-color: rgba(255, 0, 255, 0.3); } #card-ram::before { background: #ff00ff; }
-        #card-uptime { border-color: rgba(255, 204, 0, 0.3); } #card-uptime::before { background: #ffcc00; }
-        #card-temp { border-color: rgba(255, 51, 51, 0.3); } #card-temp::before { background: #ff3333; }
-
         .card h3 { 
-            font-family: 'Orbitron', sans-serif;
-            font-size: 11px; 
-            color: #94a3b8; 
+            font-size: 13px; 
+            color: #9ca3af; 
             text-transform: uppercase; 
-            margin-bottom: 10px; 
-            letter-spacing: 1px; 
+            letter-spacing: 0.5px; 
+            margin-bottom: 12px; 
             display: flex;
             align-items: center;
             gap: 8px;
+            font-weight: 600;
         }
-        .card .value { font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 800; color: #ffffff; }
-        .card .value span { font-size: 16px; font-family: 'Share Tech Mono', monospace; color: #94a3b8; }
+        .card h3 i { font-size: 14px; }
         
-        .chart-container { display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(0, 255, 204, 0.2); }
-        canvas { width: 100% !important; height: 260px !important; }
+        /* WARNA IKON ASPEK TEKNOLOGI */
+        .icon-cpu { color: #00ffcc; }
+        .icon-ram { color: #c084fc; }
+        .icon-uptime { color: #fbbf24; }
+        .icon-temp { color: #f87171; }
 
-        /* RACK SERVER AESTHETIC FOR CONTAINERS */
-        .monitor-section { width: 100%; }
-        .monitor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .monitor-section h2 { font-family: 'Orbitron', sans-serif; font-size: 16px; color: #ffffff; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; }
+        .card .value { 
+            font-size: 32px; 
+            font-weight: 700; 
+            color: #ffffff; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .card .value span { 
+            font-size: 16px; 
+            color: #6b7280; 
+            margin-left: 4px;
+            font-weight: 500;
+        }
         
-        /* RACK ENCLOSURE CABINET */
-        .monitor-rack { 
-            background: #020406; 
-            border: 3px solid #111827; 
-            border-left: 6px solid #1f2937;
-            border-right: 6px solid #1f2937;
-            border-radius: 6px; 
-            padding: 15px;
+        .chart-container { 
+            padding: 24px;
+        }
+        canvas { 
+            width: 100% !important; 
+            height: 220px !important; 
+            margin-top: 15px;
+        }
+
+        /* SECTION DOCKER SECTION */
+        .monitor-section { 
+            width: 100%; 
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.9);
+            gap: 15px;
+        }
+        .monitor-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .monitor-section h2 { 
+            font-size: 18px; 
+            color: #ffffff; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            font-weight: 600;
+        }
+        
+        /* DOCKER LIST RAPI */
+        .monitor-rack { 
+            background: #111827; 
+            border: 1px solid #1f2937;
+            border-radius: 12px; 
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        /* INDIVIDUAL BLADE SERVER IN THE RACK */
         .server-blade { 
-            background: linear-gradient(90deg, #0f172a 0%, #090d16 100%); 
-            border: 1px solid #334155; 
-            border-radius: 4px;
-            padding: 12px 20px;
+            background: #1f2937; 
+            border: 1px solid transparent;
+            border-radius: 8px;
+            padding: 16px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            position: relative;
+            transition: all 0.2s ease;
         }
-        .server-blade::after {
-            content: ''; position: absolute; right: 4px; top: 25%; width: 2px; height: 50%; background: rgba(255,255,255,0.05);
+        .server-blade:hover {
+            background: #2563eb0a;
+            border-color: rgba(37, 99, 235, 0.2);
         }
-        .blade-left { display: flex; align-items: center; gap: 20px; width: 65%; }
+
+        .blade-left { 
+            display: flex; 
+            align-items: center; 
+            gap: 16px; 
+            width: 50%; 
+        }
         
-        /* LED LIGHTS SYSTEM */
-        .led-panel { display: flex; gap: 6px; align-items: center; }
-        .led { width: 8px; height: 8px; border-radius: 50%; background: #334155; transition: all 0.3s; }
-        
+        /* LED INDIKATOR YANG ELEGAN */
+        .led-panel { display: flex; align-items: center; }
+        .led { 
+            width: 10px; 
+            height: 10px; 
+            border-radius: 50%; 
+            background: #4b5563; 
+        }
         .led-active { 
             background: #00ffcc; 
-            box-shadow: 0 0 10px #00ffcc; 
-            animation: blink 1.5s infinite alternate;
+            box-shadow: 0 0 8px rgba(0, 255, 204, 0.6); 
         }
         .led-offline { 
-            background: #ff0055; 
-            box-shadow: 0 0 10px #ff0055; 
+            background: #f87171; 
+            box-shadow: 0 0 8px rgba(248, 113, 113, 0.6); 
         }
 
-        @keyframes blink {
-            0% { opacity: 0.4; } 100% { opacity: 1; }
+        .blade-details h4 { 
+            font-size: 15px; 
+            color: #ffffff; 
+            font-weight: 600;
         }
-
-        .blade-details h4 { font-family: 'Orbitron', sans-serif; font-size: 15px; color: #ffffff; letter-spacing: 0.5px; }
-        .blade-details p { font-size: 11px; color: #64748b; margin-top: 2px; font-family: 'Share Tech Mono', monospace; }
+        .blade-details p { 
+            font-size: 12px; 
+            color: #9ca3af; 
+            margin-top: 4px; 
+            font-family: 'JetBrains Mono', monospace; 
+        }
         
-        .blade-network { font-size: 13px; color: #00ffcc; width: 20%; text-align: right; }
-        .blade-status-text { font-family: 'Orbitron', sans-serif; font-size: 10px; padding: 2px 6px; border: 1px solid #334155; border-radius: 3px; background: rgba(0,0,0,0.3); }
+        .blade-network { 
+            font-size: 13px; 
+            color: #e2e8f0; 
+            width: 30%; 
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .blade-network i { color: #64748b; }
 
-        /* MODAL COCKPIT */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: all 0.25s ease; z-index: 100; }
+        .blade-status-text { 
+            font-size: 11px; 
+            font-weight: 600;
+            padding: 4px 10px; 
+            border-radius: 6px; 
+            background: rgba(255,255,255,0.03);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* PANEL COCKPIT / MODAL */
+        .modal-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(8px); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            opacity: 0; 
+            pointer-events: none; 
+            transition: all 0.2s ease; 
+            z-index: 100; 
+        }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal { background: #090d16; border: 2px solid #00ffcc; width: 90%; max-width: 420px; border-radius: 8px; padding: 25px; box-shadow: 0 0 30px rgba(0, 255, 204, 0.2); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-family: 'Orbitron', sans-serif;}
-        .close-modal { background: none; border: none; color: #ff0055; font-size: 24px; cursor: pointer; }
-        .setting-section h4 { color: #94a3b8; font-size: 12px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px dashed #1e293b; padding-bottom: 4px;}
-        .toggle-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px; }
-        .save-btn { background: #00ffcc; color: #06080c; width: 100%; padding: 12px; border-radius: 4px; margin-top: 15px; font-weight: bold; }
+        
+        .modal { 
+            background: #111827; 
+            border: 1px solid #1f2937; 
+            width: 90%; 
+            max-width: 440px; 
+            border-radius: 12px; 
+            padding: 28px; 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        .modal-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 24px; 
+        }
+        .modal-header h2 { font-size: 18px; font-weight: 700; color: #ffffff; }
+        .close-modal { background: none; border: none; color: #9ca3af; font-size: 20px; cursor: pointer; transition: color 0.2s; }
+        .close-modal:hover { color: #f87171; }
+        
+        .setting-section h4 { 
+            color: #38bdf8; 
+            font-size: 11px; 
+            margin-bottom: 16px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            font-weight: 700;
+        }
+        .toggle-group { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 14px; 
+            font-size: 14px; 
+            color: #e2e8f0;
+        }
+        .toggle-group label { font-weight: 500; }
+        
+        .save-btn { 
+            background: #00ffcc; 
+            color: #0b111e; 
+            width: 100%; 
+            padding: 12px; 
+            border-radius: 6px; 
+            margin-top: 20px; 
+            font-weight: 700; 
+            font-size: 14px;
+            justify-content: center;
+        }
+        .save-btn:hover {
+            background: #05e6b7;
+        }
         
         .select-input {
-            width: 110px; background: #000; border: 1px solid #00ffcc; color: #00ffcc; padding: 5px; border-radius: 4px; font-family: 'Share Tech Mono';
+            width: 120px; 
+            background: #1f2937; 
+            border: 1px solid #374151; 
+            color: #ffffff; 
+            padding: 6px 10px; 
+            border-radius: 6px; 
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+        }
+        .select-input:focus {
+            border-color: #00ffcc;
         }
 
-        @media (max-width: 900px) { 
+        /* RESPONSIVE LAYOUT */
+        @media (max-width: 960px) { 
             .main-layout { grid-template-columns: 1fr; } 
             .status-sidebar { grid-template-columns: 1fr 1fr; } 
-            .blade-left { width: 50%; } .blade-network { width: 35%; }
+            .blade-left { width: 50%; } .blade-network { width: 30%; }
+        }
+        @media (max-width: 540px) {
+            body { padding: 15px; gap: 15px; }
+            .status-sidebar { grid-template-columns: 1fr; gap: 15px; }
+            .server-blade { flex-direction: column; align-items: start; gap: 10px; }
+            .blade-left, .blade-network { width: 100%; text-align: left; justify-content: start; }
         }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="logo">MAINFRAME//<span>STB-NODE01</span></div>
-    <button class="btn settings-btn" id="btn-cockpit" onclick="toggleSettingsModal(true)"><i class="fa-solid fa-terminal"></i> COCKPIT SYS</button>
-</div>
+<div class="app-container">
+    <div class="header">
+        <div class="logo">Sistem Pusat Kendali <span>STB-SERVER</span></div>
+        <button class="btn settings-btn" id="btn-cockpit" onclick="toggleSettingsModal(true)"><i class="fa-solid fa-terminal"></i> Pengaturan Sistem</button>
+    </div>
 
-<div class="main-layout">
-    <div class="card chart-container">
-        <h3 id="txt-chart-title"><i class="fa-solid fa-chart-line"></i> REAL-TIME TELEMETRY STREAM</h3>
-        <canvas id="cpuChart"></canvas>
+    <div class="main-layout">
+        <div class="card chart-container">
+            <h3 id="txt-chart-title"><i class="fa-solid fa-chart-line"></i> Grafik Beban Kerja Real-Time</h3>
+            <canvas id="cpuChart"></canvas>
+        </div>
+        <div class="status-sidebar">
+            <div class="card" id="card-cpu"><h3><i class="fa-solid fa-microchip icon-cpu"></i> <span id="txt-lbl-cpu">Beban CPU</span></h3><div class="value" id="cpu-text">0<span>%</span></div></div>
+            <div class="card" id="card-ram"><h3><i class="fa-solid fa-memory icon-ram"></i> <span id="txt-lbl-ram">Penggunaan RAM</span></h3><div class="value" id="ram-text">0<span>%</span></div></div>
+            <div class="card" id="card-uptime"><h3><i class="fa-solid fa-clock icon-uptime"></i> <span id="txt-lbl-uptime">Waktu Aktif Sistem</span></h3><div class="value" id="uptime-text">0<span>s</span></div></div>
+            <div class="card" id="card-temp"><h3><i class="fa-solid fa-temperature-half icon-temp"></i> <span id="txt-lbl-temp">Suhu Perangkat</span></h3><div class="value" id="temp-text">0<span>°C</span></div></div>
+        </div>
     </div>
-    <div class="status-sidebar">
-        <div class="card" id="card-cpu"><h3 id="txt-lbl-cpu"><i class="fa-solid fa-microchip"></i> CPU CORE LOAD</h3><div class="value" id="cpu-text">0<span>%</span></div></div>
-        <div class="card" id="card-ram"><h3 id="txt-lbl-ram"><i class="fa-solid fa-memory"></i> VIRTUAL RAM</h3><div class="value" id="ram-text">0<span>%</span></div></div>
-        <div class="card" id="card-uptime"><h3 id="txt-lbl-uptime"><i class="fa-solid fa-clock"></i> NODE UPTIME</h3><div class="value" id="uptime-text">0<span>s</span></div></div>
-        <div class="card" id="card-temp"><h3 id="txt-lbl-temp"><i class="fa-solid fa-temperature-half"></i> THERMAL SENSOR</h3><div class="value" id="temp-text">0<span>°C</span></div></div>
-    </div>
-</div>
 
-<div class="monitor-section">
-    <div class="monitor-header">
-        <h2 id="txt-rack-title"><i class="fa-solid fa-server"></i> MAINFRAME CONTAINER RACK CABINET (<span id="container-count">0</span> BLADES)</h2>
-        <button class="btn prune-btn" id="btn-purge" onclick="pruneContainers()"><i class="fa-solid fa-broom"></i> PURGE DEAD BLADES</button>
+    <div class="monitor-section">
+        <div class="monitor-header">
+            <h2 id="txt-rack-title"><i class="fa-solid fa-server"></i> Daftar Layanan Aplikasi (0 Terpasang)</h2>
+            <button class="btn prune-btn" id="btn-purge" onclick="pruneContainers()"><i class="fa-solid fa-broom"></i> Bersihkan Aplikasi Mati</button>
+        </div>
+        <div class="monitor-rack" id="containers-container"></div>
     </div>
-    <div class="monitor-rack" id="containers-container"></div>
 </div>
 
 <div class="modal-overlay" id="settingsModal">
     <div class="modal">
-        <div class="modal-header"><h2 id="txt-modal-title">// SYSTEM CONFIG</h2><button class="close-modal" onclick="toggleSettingsModal(false)">&times;</button></div>
+        <div class="modal-header"><h2 id="txt-modal-title">Konfigurasi Panel</h2><button class="close-modal" onclick="toggleSettingsModal(false)">&times;</button></div>
         <form id="settingsForm">
+            
             <div class="setting-section" style="margin-bottom: 20px;">
-                <h4 id="txt-sec-lang">SYSTEM LANGUAGE</h4>
+                <h4 id="txt-sec-lang">Bahasa Terpilih</h4>
                 <div class="toggle-group">
-                    <label id="txt-lbl-lang">CHOOSE LANGUAGE</label>
+                    <label id="txt-lbl-lang">Pilih Bahasa</label>
                     <select id="set-lang" class="select-input">
                         <option value="id">Indonesia</option>
                         <option value="en">English</option>
@@ -242,17 +424,17 @@
             </div>
 
             <div class="setting-section">
-                <h4 id="txt-sec-tele">TELEMETRY MODULES</h4>
-                <div class="toggle-group"><label id="txt-opt-cpu">MONITOR CPU STATUS</label><input type="checkbox" id="set-showCpu"></div>
-                <div class="toggle-group"><label id="txt-opt-ram">MONITOR RAM STATUS</label><input type="checkbox" id="set-showRam"></div>
-                <div class="toggle-group"><label id="txt-opt-uptime">MONITOR UPTIME STATUS</label><input type="checkbox" id="set-showUptime"></div>
-                <div class="toggle-group"><label id="txt-opt-temp">MONITOR SENSOR THERMAL</label><input type="checkbox" id="set-showTemp"></div>
+                <h4 id="txt-sec-tele">Modul Pemantauan</h4>
+                <div class="toggle-group"><label id="txt-opt-cpu">Pantau Status CPU</label><input type="checkbox" id="set-showCpu"></div>
+                <div class="toggle-group"><label id="txt-opt-ram">Pantau Status RAM</label><input type="checkbox" id="set-showRam"></div>
+                <div class="toggle-group"><label id="txt-opt-uptime">Pantau Waktu Aktif</label><input type="checkbox" id="set-showUptime"></div>
+                <div class="toggle-group"><label id="txt-opt-temp">Pantau Suhu Inti</label><input type="checkbox" id="set-showTemp"></div>
                 <div class="toggle-group" style="margin-top: 15px;">
-                    <label id="txt-opt-chart">CHART REFRESH POINTS</label>
-                    <input type="number" id="set-chartPoints" min="5" max="50" class="select-input" style="width: 60px; text-align: center;">
+                    <label id="txt-opt-chart">Titik Segarkan Grafik</label>
+                    <input type="number" id="set-chartPoints" min="5" max="50" class="select-input" style="width: 65px; text-align: center;">
                 </div>
             </div>
-            <button type="submit" class="btn save-btn" id="btn-save-config">EXECUTE CONFIG</button>
+            <button type="submit" class="btn save-btn" id="btn-save-config">Simpan Konfigurasi</button>
         </form>
     </div>
 </div>

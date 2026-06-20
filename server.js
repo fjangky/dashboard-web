@@ -6,10 +6,9 @@ const Docker = require('dockerode');
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 const app = express();
-const PORT = 3080;
+const PORT = 3000;
 const CONFIG_FILE = path.join(__dirname, 'config.json');
 
-// Default config ditambah variabel lang
 if (!fs.existsSync(CONFIG_FILE)) {
     fs.writeFileSync(CONFIG_FILE, JSON.stringify({ showCpu: true, showRam: true, showUptime: true, showTemp: true, chartPoints: 20, lang: 'id' }, null, 2));
 }
@@ -23,11 +22,10 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
-// API Stats Hardware
 app.get('/api/stats', async (req, res) => {
     try {
         const cpuTemp = await si.cpuTemperature();
-        const currentTemp = (cpuTemp.main > 0) ? Math.round(cpuTemp.main) : Math.floor(Math.random() * (65 - 45 + 1)) + 45;
+        const currentTemp = (cpuTemp.main > 0) ? Math.round(cpuTemp.main) : Math.floor(Math.random() * (60 - 45 + 1)) + 45;
         res.json({ 
             cpuUsage: Math.floor(Math.random() * 100), 
             ramUsage: Math.floor(Math.random() * 80), 
@@ -35,10 +33,9 @@ app.get('/api/stats', async (req, res) => {
             temperature: currentTemp, 
             config: readConfig() 
         });
-    } catch (e) { res.status(500).json({ error: "Gagal memproses data" }); }
+    } catch (e) { res.status(500).json({ error: "Gagal mengambil statistik hardware." }); }
 });
 
-// API Get & Save Config
 app.get('/api/settings', (req, res) => { res.json({ config: readConfig() }); });
 app.post('/api/settings/config', (req, res) => {
     const { showCpu, showRam, showUptime, showTemp, chartPoints, lang } = req.body;
@@ -53,7 +50,6 @@ app.post('/api/settings/config', (req, res) => {
     res.json({ success: true });
 });
 
-// API Get List Containers
 app.get('/api/containers', async (req, res) => {
     try {
         const containers = await docker.listContainers({ all: true });
@@ -69,22 +65,18 @@ app.get('/api/containers', async (req, res) => {
             };
         });
         res.json(containerData);
-    } catch (err) { res.status(500).json({ error: "Docker offline" }); }
+    } catch (err) { res.status(500).json({ error: "Docker tidak merespon." }); }
 });
 
-// API Prune Containers
 app.post('/api/containers/prune', async (req, res) => {
     try {
         const data = await docker.pruneContainers();
         const deletedCount = data.ContainersDeleted ? data.ContainersDeleted.length : 0;
-        res.json({ 
-            success: true, 
-            message: deletedCount 
-        });
+        res.json({ success: true, message: deletedCount });
     } catch (err) {
-        res.status(500).json({ success: false });
+        res.status(500).json({ success: false, error: "Gagal membersihkan Docker." });
     }
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.listen(PORT, '0.0.0.0', () => console.log(`Dashboard aktif di port: ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Pusat Kendali aktif di port: ${PORT}`));

@@ -2,57 +2,57 @@ const ctx = document.getElementById('cpuChart').getContext('2d');
 let maxChartPoints = 20;
 let currentLang = 'id';
 
-// Kamus Multi-Bahasa
+// Kamus Multi-Bahasa yang Lebih Ramah dan Hangat
 const dictionary = {
     id: {
-        cockpitBtn: '<i class="fa-solid fa-terminal"></i> KOKPIT SIS',
-        chartTitle: '<i class="fa-solid fa-chart-line"></i> ALIRAN TELEMETRI REAL-TIME',
-        lblCpu: '<i class="fa-solid fa-microchip"></i> BEBAN INTI CPU',
-        lblRam: '<i class="fa-solid fa-memory"></i> RAM VIRTUAL',
-        lblUptime: '<i class="fa-solid fa-clock"></i> UPTIME NODE',
-        lblTemp: '<i class="fa-solid fa-temperature-half"></i> SENSOR TERMAL',
-        rackTitle: '<i class="fa-solid fa-server"></i> KABINET RAK KONTAINER MAINFRAME ($count BLADES)',
-        purgeBtn: '<i class="fa-solid fa-broom"></i> SAPU BLADE MATI',
-        modalTitle: '// KONFIGURASI SISTEM',
-        secLang: 'BAHASA SISTEM',
-        lblLang: 'PILIH BAHASA',
-        secTele: 'MODUL TELEMETRI',
-        optCpu: 'PANTAU STATUS CPU',
-        optRam: 'PANTAU STATUS RAM',
-        optUptime: 'PANTAU STATUS UPTIME',
-        optTemp: 'PANTAU SENSOR TERMAL',
-        optChart: 'TITIK REFRESH GRAFIK',
-        btnSave: 'EKSEKUSI KONFIGURASI',
-        rackEmpty: 'KOMPARTEMEN RAK KOSONG // TIDAK ADA BLADE AKTIF',
-        confirmPurge: 'EKSEKUSI PEMBERSIHAN? Seluruh kontainer dengan status TERMINATED/EXITED akan dimusnahkan permanen.',
-        msgSuccess: 'SISTEM BERSIH! $count kontainer mati berhasil dimusnahkan.',
-        msgError: 'GAGAL melakukan pembersihan Docker.',
-        msgCritical: 'KRITIKAL: Gagal terhubung ke modul inti server.'
+        cockpitBtn: '<i class="fa-solid fa-gear"></i> Pengaturan Sistem',
+        chartTitle: '<i class="fa-solid fa-chart-line"></i> Grafik Beban Kerja Real-Time',
+        lblCpu: 'Beban CPU',
+        lblRam: 'Penggunaan RAM',
+        lblUptime: 'Waktu Aktif Sistem',
+        lblTemp: 'Suhu Perangkat',
+        rackTitle: '<i class="fa-solid fa-server"></i> Daftar Layanan Aplikasi ($count Terpasang)',
+        purgeBtn: '<i class="fa-solid fa-broom"></i> Bersihkan Aplikasi Mati',
+        modalTitle: 'Konfigurasi Panel',
+        secLang: 'Bahasa Terpilih',
+        lblLang: 'Pilih Bahasa',
+        secTele: 'Modul Pemantauan',
+        optCpu: 'Pantau Status CPU',
+        optRam: 'Pantau Status RAM',
+        optUptime: 'Pantau Waktu Aktif',
+        optTemp: 'Pantau Suhu Inti',
+        optChart: 'Titik Segarkan Grafik',
+        btnSave: 'Simpan Konfigurasi',
+        rackEmpty: 'Belum ada aplikasi yang berjalan di sistem Anda.',
+        confirmPurge: 'Apakah Anda ingin membersihkan sistem? Seluruh aplikasi kontainer yang sudah berhenti (tidak aktif) akan dihapus secara aman.',
+        msgSuccess: 'Sistem berhasil dibersihkan! Bersama dengan $count kontainer tak terpakai.',
+        msgError: 'Gagal melakukan pembersihan sistem Docker.',
+        msgCritical: 'Gagal tersambung dengan sistem inti server.'
     },
     en: {
-        cockpitBtn: '<i class="fa-solid fa-terminal"></i> COCKPIT SYS',
-        chartTitle: '<i class="fa-solid fa-chart-line"></i> REAL-TIME TELEMETRY STREAM',
-        lblCpu: '<i class="fa-solid fa-microchip"></i> CPU CORE LOAD',
-        lblRam: '<i class="fa-solid fa-memory"></i> VIRTUAL RAM',
-        lblUptime: '<i class="fa-solid fa-clock"></i> NODE UPTIME',
-        lblTemp: '<i class="fa-solid fa-temperature-half"></i> THERMAL SENSOR',
-        rackTitle: '<i class="fa-solid fa-server"></i> MAINFRAME CONTAINER RACK CABINET ($count BLADES)',
-        purgeBtn: '<i class="fa-solid fa-broom"></i> PURGE DEAD BLADES',
-        modalTitle: '// SYSTEM CONFIG',
-        secLang: 'SYSTEM LANGUAGE',
-        lblLang: 'CHOOSE LANGUAGE',
-        secTele: 'TELEMETRY MODULES',
-        optCpu: 'MONITOR CPU STATUS',
-        optRam: 'MONITOR RAM STATUS',
-        optUptime: 'MONITOR UPTIME STATUS',
-        optTemp: 'MONITOR THERMAL SENSOR',
-        optChart: 'CHART REFRESH POINTS',
-        btnSave: 'EXECUTE CONFIG',
-        rackEmpty: 'RACK COMPARTMENT EMPTY // NO ACTIVE BLADES DETECTED',
-        confirmPurge: 'EXECUTE PURGE ACTION? All containers with TERMINATED/EXITED status will be permanently destroyed.',
-        msgSuccess: 'SYSTEM PURGED! $count dead containers successfully destroyed.',
-        msgError: 'FAILED to perform Docker prune.',
-        msgCritical: 'CRITICAL: Failed to connect to server core module.'
+        cockpitBtn: '<i class="fa-solid fa-gear"></i> System Settings',
+        chartTitle: '<i class="fa-solid fa-chart-line"></i> Real-Time Workload Stream',
+        lblCpu: 'CPU Core Load',
+        lblRam: 'RAM Utilization',
+        lblUptime: 'System Uptime',
+        lblTemp: 'Device Temperature',
+        rackTitle: '<i class="fa-solid fa-server"></i> Application Services List ($count Installed)',
+        purgeBtn: '<i class="fa-solid fa-broom"></i> Clear Idle Applications',
+        modalTitle: 'Panel Configuration',
+        secLang: 'System Language',
+        lblLang: 'Choose Language',
+        secTele: 'Monitoring Modules',
+        optCpu: 'Monitor CPU Status',
+        optRam: 'Monitor RAM Status',
+        optUptime: 'Monitor System Uptime',
+        optTemp: 'Monitor Device Temperature',
+        optChart: 'Chart Refresh Points',
+        btnSave: 'Save Configuration',
+        rackEmpty: 'No applications are running on your system yet.',
+        confirmPurge: 'Do you want to clean up the system? All stopped container applications will be safely removed.',
+        msgSuccess: 'System cleared successfully! Removed $count unused containers.',
+        msgError: 'Failed to perform Docker system prune.',
+        msgCritical: 'Failed to connect to the server core system.'
     }
 };
 
@@ -62,10 +62,10 @@ function applyLanguage(lang, count = 0) {
     
     document.getElementById('btn-cockpit').innerHTML = l.cockpitBtn;
     document.getElementById('txt-chart-title').innerHTML = l.chartTitle;
-    document.getElementById('txt-lbl-cpu').innerHTML = l.lblCpu;
-    document.getElementById('txt-lbl-ram').innerHTML = l.lblRam;
-    document.getElementById('txt-lbl-uptime').innerHTML = l.lblUptime;
-    document.getElementById('txt-lbl-temp').innerHTML = l.lblTemp;
+    document.getElementById('txt-lbl-cpu').innerText = l.lblCpu;
+    document.getElementById('txt-lbl-ram').innerText = l.lblRam;
+    document.getElementById('txt-lbl-uptime').innerText = l.lblUptime;
+    document.getElementById('txt-lbl-temp').innerText = l.lblTemp;
     document.getElementById('txt-rack-title').innerHTML = l.rackTitle.replace('$count', count);
     document.getElementById('btn-purge').innerHTML = l.purgeBtn;
     
@@ -81,19 +81,33 @@ function applyLanguage(lang, count = 0) {
     document.getElementById('btn-save-config').innerText = l.btnSave;
 }
 
-// Chart Initial Setup
+// Inisialisasi Grafik yang Lembut & Modern
 const cpuChart = new Chart(ctx, {
     type: 'line',
     data: {
         labels: [],
-        datasets: [{ label: 'CPU', data: [], borderColor: '#00ffcc', backgroundColor: 'rgba(0, 255, 204, 0.02)', fill: true, tension: 0.3, borderWidth: 2, pointRadius: 0 }]
+        datasets: [{ 
+            label: 'CPU', 
+            data: [], 
+            borderColor: '#00ffcc', 
+            backgroundColor: 'rgba(0, 255, 204, 0.01)', 
+            fill: true, 
+            tension: 0.4, 
+            borderWidth: 2, 
+            pointRadius: 0 
+        }]
     },
     options: { 
         responsive: true, 
         plugins: { legend: { display: false } }, 
         scales: { 
             x: { display: false }, 
-            y: { min: 0, max: 100, grid: { color: 'rgba(30, 41, 59, 0.3)' }, ticks: { color: '#00ffcc', font: { family: 'Share Tech Mono', size: 11 } } } 
+            y: { 
+                min: 0, 
+                max: 100, 
+                grid: { color: 'rgba(255, 255, 255, 0.04)' }, 
+                ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 11 } } 
+            } 
         } 
     }
 });
@@ -107,14 +121,12 @@ async function fetchData() {
         document.getElementById('uptime-text').innerHTML = `${data.uptime}<span>s</span>`;
         document.getElementById('temp-text').innerHTML = `${data.temperature}<span>°C</span>`;
         
-        document.getElementById('card-cpu').style.display = data.config.showCpu ? 'block' : 'none';
-        document.getElementById('card-ram').style.display = data.config.showRam ? 'block' : 'none';
-        document.getElementById('card-uptime').style.display = data.config.showUptime ? 'block' : 'none';
-        document.getElementById('card-temp').style.display = data.config.showTemp ? 'block' : 'none';
+        document.getElementById('card-cpu').style.display = data.config.showCpu ? 'flex' : 'none';
+        document.getElementById('card-ram').style.display = data.config.showRam ? 'flex' : 'none';
+        document.getElementById('card-uptime').style.display = data.config.showUptime ? 'flex' : 'none';
+        document.getElementById('card-temp').style.display = data.config.showTemp ? 'flex' : 'none';
         
         maxChartPoints = data.config.chartPoints;
-        
-        // Terapkan bahasa dari konfigurasi server
         const currentCount = document.getElementById('container-count').innerText || 0;
         applyLanguage(data.config.lang || 'id', currentCount);
 
@@ -126,7 +138,7 @@ async function fetchData() {
         cpuChart.data.labels.push(time);
         cpuChart.data.datasets[0].data.push(data.cpuUsage);
         cpuChart.update('none');
-    } catch (e) { console.log("Koneksi Telemetri Terputus"); }
+    } catch (e) { console.log("Sambungan telemetri terputus."); }
 }
 
 async function updateContainersMonitor() {
@@ -135,7 +147,6 @@ async function updateContainersMonitor() {
         const containers = await res.json();
         document.getElementById('container-count').innerText = containers.length;
         
-        // Update header judul rak biar sinkron jumlahnya sesuai bahasa terpilih
         const l = dictionary[currentLang];
         document.getElementById('txt-rack-title').innerHTML = l.rackTitle.replace('$count', containers.length);
 
@@ -143,29 +154,32 @@ async function updateContainersMonitor() {
         containerBox.innerHTML = '';
 
         if(containers.length === 0) {
-            containerBox.innerHTML = `<p style="color: #64748b; font-size: 14px; padding: 10px;">${l.rackEmpty}</p>`;
+            containerBox.innerHTML = `<p style="color: #9ca3af; font-size: 14px; padding: 15px; text-align: center;">${l.rackEmpty}</p>`;
             return;
         }
 
         containers.forEach(c => {
             const isRunning = c.state === 'running';
             const ledClass = isRunning ? 'led-active' : 'led-offline';
-            const statusColor = isRunning ? '#00ffcc' : '#ff0055';
+            const statusColor = isRunning ? '#00ffcc' : '#f87171';
+            const statusBg = isRunning ? 'rgba(0, 255, 204, 0.05)' : 'rgba(248, 113, 113, 0.05)';
             
             containerBox.innerHTML += `
                 <div class="server-blade">
                     <div class="blade-left">
                         <div class="led-panel"><div class="led ${ledClass}"></div></div>
                         <div class="blade-details">
-                            <h4>${c.name.toUpperCase()}</h4>
-                            <p>SYS_ID: ${c.id} | IMAGE_SOURCE: ${c.image}</p>
+                            <h4>${c.name}</h4>
+                            <p>ID: ${c.id} | Image: ${c.image}</p>
                         </div>
                     </div>
-                    <div class="blade-network"><i class="fa-solid fa-ethernet"></i> PORT: ${c.ports}</div>
-                    <div class="blade-status-text" style="color: ${statusColor}; border-color: ${statusColor}50;">${c.state.toUpperCase()}</div>
+                    <div class="blade-network"><i class="fa-solid fa-ethernet"></i> Port: ${c.ports}</div>
+                    <div class="blade-status-text" style="color: ${statusColor}; background: ${statusBg};">
+                        ${isRunning ? 'Aktif' : 'Berhenti'}
+                    </div>
                 </div>`;
         });
-    } catch (err) { console.log("Gagal sinkronisasi data kabinet server."); }
+    } catch (err) { console.log("Gagal menyinkronkan daftar aplikasi."); }
 }
 
 async function pruneContainers() {
@@ -176,7 +190,7 @@ async function pruneContainers() {
         const res = await fetch('/api/containers/prune', { method: 'POST' });
         const result = await res.json();
         if (result.success) {
-            alert(l.msgSuccess.replace('$count', result.message));
+            alert(result.message > 0 ? l.msgSuccess.replace('$count', result.message) : "Sistem Anda sudah bersih sepenuhnya!");
             updateContainersMonitor();
         } else {
             alert(l.msgError);
