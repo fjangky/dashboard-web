@@ -6,7 +6,7 @@ const Docker = require('dockerode');
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 const app = express();
-const PORT = 3000;
+const PORT = 3080;
 const CONFIG_FILE = path.join(__dirname, 'config.json');
 
 // Default config ditambah variabel lang
