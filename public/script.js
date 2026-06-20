@@ -39,8 +39,7 @@ const dictionary = {
         msgError: 'Gagal melakukan pembersihan sistem Docker.',
         msgCritical: 'Gagal tersambung dengan sistem inti server.',
         btnYes: 'Ya, Bersihkan', btnNo: 'Batal', btnOk: 'Selesai',
-        copyright: '&copy; 2026 <span style="color: #00ffcc; font-weight: 600;">jangky-project</span>. Hak Cipta Dilindungi Undang-Undang.'
-    },
+        copyright: '&copy; 2026 <span style="color: #00ffcc; font-weight: 600;">jangky-project</span>. Hak Cipta Dilindungi Undang-Undang.'},
     en: {
         cockpitBtn: '<i class="fa-solid fa-gear"></i> System Settings',
         chartTitle: '<i class="fa-solid fa-chart-line"></i> Real-Time Workload Stream',
@@ -77,8 +76,7 @@ const dictionary = {
         msgError: 'Failed to perform Docker system prune.',
         msgCritical: 'Failed to connect to the server core system.',
         btnYes: 'Yes, Clean Up', btnNo: 'Cancel', btnOk: 'Got It',
-        copyright: '&copy; 2026 <span style="color: #00ffcc; font-weight: 600;">jangky-project</span>. All Rights Reserved.'
-    }
+        copyright: '&copy; 2026 <span style="color: #00ffcc; font-weight: 600;">jangky-project</span>. All Rights Reserved.'}
 };
 
 function showCustomPopup({ type, title, message, onConfirm = null }) {
@@ -138,11 +136,11 @@ function applyLanguage(lang) {
     document.getElementById('btn-save-config').innerText = l.btnSave;
     document.getElementById('txt-sec-network').innerText = l.secNetwork;
     document.getElementById('txt-lbl-port').innerText = l.lblPort;
-    document.getElementById('dashboard-footer').innerHTML = l.copyright;
     const footerEl = document.getElementById('footer-text');
     if (footerEl) {
         footerEl.innerHTML = l.copyright;
     }
+    document.getElementById('dashboard-footer').innerHTML = l.copyright;
 }
 
 // --- PEMBUATAN GRADASI DAN KONFIGURASI GRAFIK ELEGAN ---
