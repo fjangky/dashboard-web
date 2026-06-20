@@ -111,7 +111,6 @@ function applyLanguage(lang) {
     document.getElementById('txt-lbl-uptime').innerText = l.lblUptime;
     document.getElementById('txt-lbl-temp').innerText = l.lblTemp;
     
-    // Perbarui judul dasar seksi tanpa merusak elemen jumlah (span)
     const sysText = document.getElementById('sys-count').outerHTML;
     document.getElementById('txt-sys-title').innerHTML = `${l.sysTitle} ${sysText}`;
     const dockerText = document.getElementById('docker-count').outerHTML;
@@ -179,14 +178,12 @@ async function updateContainersMonitor() {
         dockerBox.innerHTML = '';
         const l = dictionary[currentLang];
 
-        // Render Rak System Armbian
         if(services.system.length === 0) {
             sysBox.innerHTML = `<p style="color: #9ca3af; font-size: 13px; padding: 15px; text-align: center;">${l.rackEmpty}</p>`;
         } else {
             services.system.forEach(s => sysBox.innerHTML += createBladeHtml(s));
         }
 
-        // Render Rak Docker
         if(services.docker.length === 0) {
             dockerBox.innerHTML = `<p style="color: #9ca3af; font-size: 13px; padding: 15px; text-align: center;">${l.rackEmpty}</p>`;
         } else {
@@ -195,6 +192,7 @@ async function updateContainersMonitor() {
     } catch (err) { console.log("Gagal menyinkronkan daftar aplikasi."); }
 }
 
+// Fungsi Terpusat: Merender Baris Blade Beserta Ikon dan Status
 function createBladeHtml(s) {
     const isRunning = s.state === 'running';
     const ledClass = isRunning ? 'led-active' : 'led-offline';
@@ -202,16 +200,22 @@ function createBladeHtml(s) {
     const statusBg = isRunning ? 'rgba(0, 255, 204, 0.05)' : 'rgba(248, 113, 113, 0.05)';
     const statusText = isRunning ? (currentLang === 'id' ? 'Aktif' : 'Active') : (currentLang === 'id' ? 'Berhenti' : 'Stopped');
     
+    // Penentuan ikon jaringan berdasarkan tipe aplikasi secara otomatis
+    const netIcon = s.type === 'system' ? '<i class="fa-solid fa-network-wired"></i>' : '<i class="fa-solid fa-ethernet"></i>';
+    
+    // Label tambahan untuk membedakan service OS asli di UI
+    const osBadge = s.type === 'system' ? '<span style="font-size:10px; color:#38bdf8; border:1px solid rgba(56,189,248,0.4); padding:1px 5px; border-radius:4px; font-weight:500;">OS</span>' : '';
+
     return `
         <div class="server-blade">
             <div class="blade-left">
                 <div class="led ${ledClass}"></div>
                 <div class="blade-details">
-                    <h4>${s.name}</h4>
+                    <h4>${s.name} ${osBadge}</h4>
                     <p>ID: ${s.id} | Base: ${s.image}</p>
                 </div>
             </div>
-            <div class="blade-network">Port: ${s.ports}</div>
+            <div class="blade-network">${netIcon} Port: ${s.ports}</div>
             <div class="blade-status-text" style="color: ${statusColor}; background: ${statusBg};">
                 ${statusText}
             </div>

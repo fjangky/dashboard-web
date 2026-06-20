@@ -42,15 +42,26 @@
         .monitor-section h2 span { font-size: 12px; color: #6b7280; }
         .monitor-rack { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 10px; min-height: 100px; }
 
-        .server-blade { background: #1f2937; border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
+        .server-blade { background: #1f2937; border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; border: 1px solid transparent; transition: all 0.2s ease; }
+        .server-blade:hover { background: #2563eb0a; border-color: rgba(37, 99, 235, 0.2); }
+        
         .blade-left { display: flex; align-items: center; gap: 14px; width: 60%; }
+        
+        /* Animasi LED Berkedip */
         .led { width: 9px; height: 9px; border-radius: 50%; }
-        .led-active { background: #00ffcc; box-shadow: 0 0 8px rgba(0, 255, 204, 0.5); }
+        .led-active { background: #00ffcc; box-shadow: 0 0 8px rgba(0, 255, 204, 0.6); animation: pulseLed 2s infinite ease-in-out; }
         .led-offline { background: #f87171; box-shadow: 0 0 8px rgba(248, 113, 113, 0.5); }
 
-        .blade-details h4 { font-size: 14px; color: #ffffff; font-weight: 600; }
+        @keyframes pulseLed {
+            0% { transform: scale(1); opacity: 1; box-shadow: 0 0 6px rgba(0, 255, 204, 0.5); }
+            50% { transform: scale(1.1); opacity: 0.7; box-shadow: 0 0 12px rgba(0, 255, 204, 0.8); }
+            100% { transform: scale(1); opacity: 1; box-shadow: 0 0 6px rgba(0, 255, 204, 0.5); }
+        }
+
+        .blade-details h4 { font-size: 14px; color: #ffffff; font-weight: 600; display: flex; align-items: center; gap: 6px; }
         .blade-details p { font-size: 11px; color: #9ca3af; margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
-        .blade-network { font-size: 12px; color: #e2e8f0; width: 25%; font-family: 'JetBrains Mono', monospace; text-align: right; }
+        .blade-network { font-size: 12px; color: #e2e8f0; width: 25%; font-family: 'JetBrains Mono', monospace; text-align: right; display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+        .blade-network i { color: #64748b; }
         .blade-status-text { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: all 0.2s ease; z-index: 100; }
@@ -80,7 +91,7 @@
         .btn-pop-cancel { background: #1f2937; border: 1px solid #374151; color: #9ca3af; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
 
         @media (max-width: 960px) { .main-layout { grid-template-columns: 1fr; } }
-        @media (max-width: 540px) { body { padding: 15px; } .status-sidebar { grid-template-columns: 1fr; } .server-blade { flex-direction: column; align-items: flex-start; gap: 10px; } .blade-left, .blade-network { width: 100%; text-align: left; } }
+        @media (max-width: 540px) { body { padding: 15px; } .status-sidebar { grid-template-columns: 1fr; } .server-blade { flex-direction: column; align-items: flex-start; gap: 10px; } .blade-left, .blade-network { width: 100%; text-align: left; justify-content: flex-start; } }
     </style>
 </head>
 <body>
