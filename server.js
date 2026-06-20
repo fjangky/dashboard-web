@@ -24,6 +24,66 @@ function writeConfig(config) {
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
 }
 
+// Helper untuk menjalankan perintah terminal Linux (Promise-based)
+function runCommand(cmd) {
+    return new Promise((resolve) => {
+        exec(cmd, (error, stdout, stderr) => {
+            if (error) {
+                resolve('');
+            } else {
+                resolve(stdout.trim());
+            }
+        });
+    });
+}
+
+// Logika pemindaian otomatis seluruh aplikasi native berdasarkan Port jaringan terbuka
+async function scanNativeServices() {
+    // Mengambil port TCP/UDP yang sedang LISTEN beserta nama prosesnya
+    // Memerlukan hak akses tinggi (sudo/root) untuk membaca segmen users:(("proses"))
+    const stdout = await runCommand('sudo ss -tulpn | grep LISTEN');
+    if (!stdout) return [];
+
+    const lines = stdout.split('\n');
+    const servicesMap = new Map();
+
+    lines.forEach(line => {
+        const portMatch = line.match(/:([0-9]+)\s+/);
+        const processMatch = line.match(/users:\(\("([^"]+)"/);
+
+        if (portMatch && processMatch) {
+            const port = portMatch[1];
+            let procName = processMatch[1];
+
+            // Abaikan docker-proxy agar aplikasi di dalam Docker tidak masuk ke list native OS
+            if (procName === 'docker-proxy') return;
+
+            // Kelompokkan port jika berasal dari aplikasi/layanan native OS yang sama
+            if (servicesMap.has(procName)) {
+                const existing = servicesMap.get(procName);
+                if (!existing.ports.includes(port)) {
+                    existing.ports.push(port);
+                }
+            } else {
+                servicesMap.set(procName, {
+                    id: `PID-${Math.floor(Math.random() * 9000) + 1000}`,
+                    name: procName.toUpperCase(),
+                    image: "Native Linux Service",
+                    ports: [port],
+                    state: "running",
+                    type: "system"
+                });
+            }
+        }
+    });
+
+    // Ubah array kumpulan port menjadi format string (misal: "80, 443")
+    return Array.from(servicesMap.values()).map(s => {
+        s.ports = s.ports.join(', ');
+        return s;
+    });
+}
+
 // --- Init App ---
 const config = readConfig();
 const PORT = config.dashboardPort || 3000;
@@ -50,7 +110,7 @@ app.get('/api/stats', async (req, res) => {
                 percent: mainDisk.use,
                 used: (mainDisk.used / 1024 / 1024 / 1024).toFixed(1),
                 total: (mainDisk.size / 1024 / 1024 / 1024).toFixed(1)
-                }, 
+            }, 
             config: readConfig() 
         });
     } catch (e) { res.status(500).json({ error: "Gagal ambil stats" }); }
@@ -72,7 +132,7 @@ app.post('/api/settings/config', (req, res) => {
 });
 
 app.get('/api/services', async (req, res) => {
-    const systemServices = [];
+    let systemServices = [];
     const dockerServices = [];
 
     // Fungsi deteksi aaPanel yang ditingkatkan (Membaca file port.pl)
@@ -104,7 +164,20 @@ app.get('/api/services', async (req, res) => {
     });
 
     try {
+        // 1. Jalankan deteksi manual aaPanel bawaan Anda
         await checkAapanel();
+
+        // 2. Jalankan deteksi otomatis aplikasi Native OS via Port Terbuka
+        const autoNative = await scanNativeServices();
+        
+        // Gabungkan deteksi manual aaPanel dengan deteksi otomatis port (hindari nama ganda jika aaPanel terdeteksi kembali)
+        autoNative.forEach(service => {
+            if (service.name !== 'AAPANEL') {
+                systemServices.push(service);
+            }
+        });
+
+        // 3. Jalankan pemindaian otomatis Kontainer Docker via Dockerode
         const containers = await docker.listContainers({ all: true });
         containers.forEach(c => {
             const portMap = c.Ports.map(p => p.PublicPort ? `${p.PublicPort}:${p.PrivatePort}` : p.PrivatePort);
@@ -117,6 +190,7 @@ app.get('/api/services', async (req, res) => {
                 type: "docker"
             });
         });
+
         res.json({ system: systemServices, docker: dockerServices });
     } catch (err) {
         res.json({ system: systemServices, docker: dockerServices });

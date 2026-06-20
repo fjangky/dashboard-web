@@ -113,7 +113,6 @@ function applyLanguage(lang) {
     currentLang = lang;
     const l = dictionary[lang];
     
-    // Validasi elemen-elemen penting sebelum mengubah konten
     if(document.getElementById('btn-cockpit')) document.getElementById('btn-cockpit').innerHTML = l.cockpitBtn;
     if(document.getElementById('txt-chart-title')) document.getElementById('txt-chart-title').innerHTML = l.chartTitle;
     if(document.getElementById('txt-lbl-cpu')) document.getElementById('txt-lbl-cpu').innerText = l.lblCpu;
@@ -147,7 +146,6 @@ function applyLanguage(lang) {
     if(document.getElementById('txt-sec-network')) document.getElementById('txt-sec-network').innerText = l.secNetwork;
     if(document.getElementById('txt-lbl-port')) document.getElementById('txt-lbl-port').innerText = l.lblPort;
     
-    // Perbaikan pelindung elemen footer yang rawan null
     const footerTextEl = document.getElementById('footer-text');
     if (footerTextEl) footerTextEl.innerHTML = l.copyright;
     
