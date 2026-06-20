@@ -39,7 +39,8 @@ const dictionary = {
         msgError: 'Gagal melakukan pembersihan sistem Docker.',
         msgCritical: 'Gagal tersambung dengan sistem inti server.',
         btnYes: 'Ya, Bersihkan', btnNo: 'Batal', btnOk: 'Selesai',
-        copyright: '&copy; 2026 <span style="color: #00ffcc; font-weight: 600;">jangky-project</span>. Hak Cipta Dilindungi Undang-Undang.'},
+        copyright: '&copy; 2026 <span style="color: #00ffcc; font-weight: 600;">jangky-project</span>. Hak Cipta Dilindungi Undang-Undang.'
+    },
     en: {
         cockpitBtn: '<i class="fa-solid fa-gear"></i> System Settings',
         chartTitle: '<i class="fa-solid fa-chart-line"></i> Real-Time Workload Stream',
@@ -76,7 +77,8 @@ const dictionary = {
         msgError: 'Failed to perform Docker system prune.',
         msgCritical: 'Failed to connect to the server core system.',
         btnYes: 'Yes, Clean Up', btnNo: 'Cancel', btnOk: 'Got It',
-        copyright: '&copy; 2026 <span style="color: #00ffcc; font-weight: 600;">jangky-project</span>. All Rights Reserved.'}
+        copyright: '&copy; 2026 <span style="color: #00ffcc; font-weight: 600;">jangky-project</span>. All Rights Reserved.'
+    }
 };
 
 function showCustomPopup({ type, title, message, onConfirm = null }) {
@@ -86,6 +88,8 @@ function showCustomPopup({ type, title, message, onConfirm = null }) {
     const msgBox = document.getElementById('pop-message');
     const btnBox = document.getElementById('pop-buttons');
     const l = dictionary[currentLang];
+
+    if (!overlay || !iconBox || !titleBox || !msgBox || !btnBox) return;
 
     iconBox.className = "popup-icon";
     if (type === 'warn') { iconBox.classList.add('warn'); iconBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>'; }
@@ -108,42 +112,49 @@ function showCustomPopup({ type, title, message, onConfirm = null }) {
 function applyLanguage(lang) {
     currentLang = lang;
     const l = dictionary[lang];
-    document.getElementById('btn-cockpit').innerHTML = l.cockpitBtn;
-    document.getElementById('txt-chart-title').innerHTML = l.chartTitle;
-    document.getElementById('txt-lbl-cpu').innerText = l.lblCpu;
-    document.getElementById('txt-lbl-ram').innerText = l.lblRam;
-    document.getElementById('txt-lbl-uptime').innerText = l.lblUptime;
-    document.getElementById('txt-lbl-temp').innerText = l.lblTemp;
     
-    const sysText = document.getElementById('sys-count').outerHTML;
-    document.getElementById('txt-sys-title').innerHTML = `${l.sysTitle} ${sysText}`;
-    const dockerText = document.getElementById('docker-count').outerHTML;
-    document.getElementById('txt-docker-title').innerHTML = `${l.dockerTitle} ${dockerText}`;
+    // Validasi elemen-elemen penting sebelum mengubah konten
+    if(document.getElementById('btn-cockpit')) document.getElementById('btn-cockpit').innerHTML = l.cockpitBtn;
+    if(document.getElementById('txt-chart-title')) document.getElementById('txt-chart-title').innerHTML = l.chartTitle;
+    if(document.getElementById('txt-lbl-cpu')) document.getElementById('txt-lbl-cpu').innerText = l.lblCpu;
+    if(document.getElementById('txt-lbl-ram')) document.getElementById('txt-lbl-ram').innerText = l.lblRam;
+    if(document.getElementById('txt-lbl-uptime')) document.getElementById('txt-lbl-uptime').innerText = l.lblUptime;
+    if(document.getElementById('txt-lbl-temp')) document.getElementById('txt-lbl-temp').innerText = l.lblTemp;
     
-    document.getElementById('btn-purge').innerHTML = `<i class="fa-solid fa-broom"></i> ${l.purgeBtn.replace('<i class="fa-solid fa-broom"></i> ', '')}`;
-    document.getElementById('txt-modal-title').innerText = l.modalTitle;
-    document.getElementById('txt-sec-identity').innerText = l.secIdentity;
-    document.getElementById('txt-lbl-title-input').innerText = l.lblTitleInput;
-    document.getElementById('txt-lbl-host-input').innerText = l.lblHostInput;
-    document.getElementById('txt-sec-lang').innerText = l.secLang;
-    document.getElementById('txt-lbl-lang').innerText = l.lblLang;
-    document.getElementById('txt-sec-tele').innerText = l.secTele;
-    document.getElementById('txt-opt-cpu').innerText = l.optCpu;
-    document.getElementById('txt-opt-ram').innerText = l.optRam;
-    document.getElementById('txt-opt-uptime').innerText = l.optUptime;
-    document.getElementById('txt-opt-temp').innerText = l.optTemp;
-    document.getElementById('txt-opt-chart').innerText = l.optChart;
-    document.getElementById('btn-save-config').innerText = l.btnSave;
-    document.getElementById('txt-sec-network').innerText = l.secNetwork;
-    document.getElementById('txt-lbl-port').innerText = l.lblPort;
-    const footerEl = document.getElementById('footer-text');
-    if (footerEl) {
-        footerEl.innerHTML = l.copyright;
+    if(document.getElementById('txt-sys-title') && document.getElementById('sys-count')) {
+        const sysText = document.getElementById('sys-count').outerHTML;
+        document.getElementById('txt-sys-title').innerHTML = `${l.sysTitle} ${sysText}`;
     }
-    document.getElementById('dashboard-footer').innerHTML = l.copyright;
+    if(document.getElementById('txt-docker-title') && document.getElementById('docker-count')) {
+        const dockerText = document.getElementById('docker-count').outerHTML;
+        document.getElementById('txt-docker-title').innerHTML = `${l.dockerTitle} ${dockerText}`;
+    }
+    
+    if(document.getElementById('btn-purge')) document.getElementById('btn-purge').innerHTML = `<i class="fa-solid fa-broom"></i> ${l.purgeBtn.replace('<i class="fa-solid fa-broom"></i> ', '')}`;
+    if(document.getElementById('txt-modal-title')) document.getElementById('txt-modal-title').innerText = l.modalTitle;
+    if(document.getElementById('txt-sec-identity')) document.getElementById('txt-sec-identity').innerText = l.secIdentity;
+    if(document.getElementById('txt-lbl-title-input')) document.getElementById('txt-lbl-title-input').innerText = l.lblTitleInput;
+    if(document.getElementById('txt-lbl-host-input')) document.getElementById('txt-lbl-host-input').innerText = l.lblHostInput;
+    if(document.getElementById('txt-sec-lang')) document.getElementById('txt-sec-lang').innerText = l.secLang;
+    if(document.getElementById('txt-lbl-lang')) document.getElementById('txt-lbl-lang').innerText = l.lblLang;
+    if(document.getElementById('txt-sec-tele')) document.getElementById('txt-sec-tele').innerText = l.secTele;
+    if(document.getElementById('txt-opt-cpu')) document.getElementById('txt-opt-cpu').innerText = l.optCpu;
+    if(document.getElementById('txt-opt-ram')) document.getElementById('txt-opt-ram').innerText = l.optRam;
+    if(document.getElementById('txt-opt-uptime')) document.getElementById('txt-opt-uptime').innerText = l.optUptime;
+    if(document.getElementById('txt-opt-temp')) document.getElementById('txt-opt-temp').innerText = l.optTemp;
+    if(document.getElementById('txt-opt-chart')) document.getElementById('txt-opt-chart').innerText = l.optChart;
+    if(document.getElementById('btn-save-config')) document.getElementById('btn-save-config').innerText = l.btnSave;
+    if(document.getElementById('txt-sec-network')) document.getElementById('txt-sec-network').innerText = l.secNetwork;
+    if(document.getElementById('txt-lbl-port')) document.getElementById('txt-lbl-port').innerText = l.lblPort;
+    
+    // Perbaikan pelindung elemen footer yang rawan null
+    const footerTextEl = document.getElementById('footer-text');
+    if (footerTextEl) footerTextEl.innerHTML = l.copyright;
+    
+    const dashboardFooterEl = document.getElementById('dashboard-footer');
+    if (dashboardFooterEl) dashboardFooterEl.innerHTML = l.copyright;
 }
 
-// --- PEMBUATAN GRADASI DAN KONFIGURASI GRAFIK ELEGAN ---
 // --- INISIALISASI GRAFIK SECARA AMAN ---
 const cpuChart = ctx ? new Chart(ctx, {
     type: 'line',
@@ -152,13 +163,12 @@ const cpuChart = ctx ? new Chart(ctx, {
         datasets: [{ 
             label: 'CPU', 
             data: [], 
-            borderColor: '#00ffcc', // Warna solid neon agar aman saat load pertama
+            borderColor: '#00ffcc', 
             backgroundColor: function(context) {
                 const chart = context.chart;
                 const {ctx, chartArea} = chart;
                 if (!chartArea) return null;
                 
-                // Membuat gradasi vertikal yang aman dari atas ke bawah
                 const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
                 gradient.addColorStop(0, 'rgba(0, 255, 204, 0.25)');
                 gradient.addColorStop(0.5, 'rgba(2, 132, 199, 0.08)');
@@ -175,7 +185,7 @@ const cpuChart = ctx ? new Chart(ctx, {
     options: { 
         responsive: true, 
         maintainAspectRatio: false,
-        animation: false, // Matikan animasi bawaan agar render real-time super ringan di STB
+        animation: false, 
         plugins: { legend: { display: false } }, 
         scales: { 
             x: { 
@@ -196,35 +206,38 @@ async function fetchData() {
     try {
         const res = await fetch('/api/stats');
         const data = await res.json();
-        document.getElementById('cpu-text').innerHTML = `${data.cpuUsage}<span>%</span>`;
-        document.getElementById('ram-text').innerHTML = `${data.ramUsage}<span>%</span>`;
-        document.getElementById('uptime-text').innerHTML = `${data.uptime}<span>s</span>`;
-        document.getElementById('temp-text').innerHTML = `${data.temperature}<span>°C</span>`;
+        if(document.getElementById('cpu-text')) document.getElementById('cpu-text').innerHTML = `${data.cpuUsage}<span>%</span>`;
+        if(document.getElementById('ram-text')) document.getElementById('ram-text').innerHTML = `${data.ramUsage}<span>%</span>`;
+        if(document.getElementById('uptime-text')) document.getElementById('uptime-text').innerHTML = `${data.uptime}<span>s</span>`;
+        if(document.getElementById('temp-text')) document.getElementById('temp-text').innerHTML = `${data.temperature}<span>°C</span>`;
         
-        // Update Data Storage Real-Time ke UI
         if(data.diskUsage) {
-            document.getElementById('disk-text').innerHTML = `${data.diskUsage.percent}<span>%</span>`;
-            document.getElementById('disk-detail').innerText = `${data.diskUsage.used} / ${data.diskUsage.total} GB`;
+            if(document.getElementById('disk-text')) document.getElementById('disk-text').innerHTML = `${data.diskUsage.percent}<span>%</span>`;
+            if(document.getElementById('disk-detail')) document.getElementById('disk-detail').innerText = `${data.diskUsage.used} / ${data.diskUsage.total} GB`;
         }
         
-        document.getElementById('card-cpu').style.display = data.config.showCpu ? 'flex' : 'none';
-        document.getElementById('card-ram').style.display = data.config.showRam ? 'flex' : 'none';
-        document.getElementById('card-uptime').style.display = data.config.showUptime ? 'flex' : 'none';
-        document.getElementById('card-temp').style.display = data.config.showTemp ? 'flex' : 'none';
+        if(document.getElementById('card-cpu')) document.getElementById('card-cpu').style.display = data.config.showCpu ? 'flex' : 'none';
+        if(document.getElementById('card-ram')) document.getElementById('card-ram').style.display = data.config.showRam ? 'flex' : 'none';
+        if(document.getElementById('card-uptime')) document.getElementById('card-uptime').style.display = data.config.showUptime ? 'flex' : 'none';
+        if(document.getElementById('card-temp')) document.getElementById('card-temp').style.display = data.config.showTemp ? 'flex' : 'none';
         
-        maxChartPoints = data.config.chartPoints;
-        document.getElementById('main-app-logo').innerHTML = `${data.config.mainTitle || "Sistem Pusat Kendali"} <span id="main-app-host">${data.config.hostTag || "STB-SERVER"}</span>`;
+        maxChartPoints = data.config.chartPoints || 20;
+        if(document.getElementById('main-app-logo')) {
+            document.getElementById('main-app-logo').innerHTML = `${data.config.mainTitle || "Sistem Pusat Kendali"} <span id="main-app-host">${data.config.hostTag || "STB-SERVER"}</span>`;
+        }
         
         applyLanguage(data.config.lang || 'id');
 
-        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        while (cpuChart.data.labels.length >= maxChartPoints) { 
-            cpuChart.data.labels.shift(); 
-            cpuChart.data.datasets[0].data.shift(); 
+        if (cpuChart) {
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            while (cpuChart.data.labels.length >= maxChartPoints) { 
+                cpuChart.data.labels.shift(); 
+                cpuChart.data.datasets[0].data.shift(); 
+            }
+            cpuChart.data.labels.push(time); 
+            cpuChart.data.datasets[0].data.push(data.cpuUsage); 
+            cpuChart.update('none');
         }
-        cpuChart.data.labels.push(time); 
-        cpuChart.data.datasets[0].data.push(data.cpuUsage); 
-        cpuChart.update('none');
     } catch (e) { console.log("Sambungan telemetri terputus."); }
 }
 
@@ -233,26 +246,28 @@ async function updateContainersMonitor() {
         const res = await fetch('/api/services');
         const services = await res.json();
         
-        document.getElementById('sys-count').innerText = `(${services.system.length})`;
-        document.getElementById('docker-count').innerText = `(${services.docker.length})`;
+        if(document.getElementById('sys-count')) document.getElementById('sys-count').innerText = `(${services.system.length})`;
+        if(document.getElementById('docker-count')) document.getElementById('docker-count').innerText = `(${services.docker.length})`;
 
         const sysBox = document.getElementById('system-services-container');
         const dockerBox = document.getElementById('docker-services-container');
         
-        sysBox.innerHTML = '';
-        dockerBox.innerHTML = '';
-        const l = dictionary[currentLang];
-
-        if(services.system.length === 0) {
-            sysBox.innerHTML = `<p style="color: #9ca3af; font-size: 13px; padding: 15px; text-align: center;">${l.rackEmpty}</p>`;
-        } else {
-            services.system.forEach(s => sysBox.innerHTML += createBladeHtml(s));
+        if (sysBox) {
+            sysBox.innerHTML = '';
+            if(services.system.length === 0) {
+                sysBox.innerHTML = `<p style="color: #9ca3af; font-size: 13px; padding: 15px; text-align: center;">${dictionary[currentLang].rackEmpty}</p>`;
+            } else {
+                services.system.forEach(s => sysBox.innerHTML += createBladeHtml(s));
+            }
         }
 
-        if(services.docker.length === 0) {
-            dockerBox.innerHTML = `<p style="color: #9ca3af; font-size: 13px; padding: 15px; text-align: center;">${l.rackEmpty}</p>`;
-        } else {
-            services.docker.forEach(s => dockerBox.innerHTML += createBladeHtml(s));
+        if (dockerBox) {
+            dockerBox.innerHTML = '';
+            if(services.docker.length === 0) {
+                dockerBox.innerHTML = `<p style="color: #9ca3af; font-size: 13px; padding: 15px; text-align: center;">${dictionary[currentLang].rackEmpty}</p>`;
+            } else {
+                services.docker.forEach(s => dockerBox.innerHTML += createBladeHtml(s));
+            }
         }
     } catch (err) { console.log("Gagal menyinkronkan daftar aplikasi."); }
 }
@@ -303,34 +318,38 @@ function pruneContainers() {
 
 async function toggleSettingsModal(show) {
     const modal = document.getElementById('settingsModal');
+    if (!modal) return;
+    
     if (show) {
         modal.classList.add('active');
         const res = await fetch('/api/settings');
         const data = await res.json();
-        document.getElementById('set-showCpu').checked = data.config.showCpu;
-        document.getElementById('set-showRam').checked = data.config.showRam;
-        document.getElementById('set-showUptime').checked = data.config.showUptime;
-        document.getElementById('set-showTemp').checked = data.config.showUptime; // Memastikan sinkronisasi modul suhu
-        document.getElementById('set-chartPoints').value = data.config.chartPoints;
-        document.getElementById('set-lang').value = data.config.lang || 'id';
-        document.getElementById('set-mainTitle').value = data.config.mainTitle || '';
-        document.getElementById('set-hostTag').value = data.config.hostTag || '';
-        document.getElementById('set-dashboardPort').value = data.config.dashboardPort || 3080;
+        if(document.getElementById('set-showCpu')) document.getElementById('set-showCpu').checked = data.config.showCpu;
+        if(document.getElementById('set-showRam')) document.getElementById('set-showRam').checked = data.config.showRam;
+        if(document.getElementById('set-showUptime')) document.getElementById('set-showUptime').checked = data.config.showUptime;
+        if(document.getElementById('set-showTemp')) document.getElementById('set-showTemp').checked = data.config.showTemp; 
+        if(document.getElementById('set-chartPoints')) document.getElementById('set-chartPoints').value = data.config.chartPoints;
+        if(document.getElementById('set-lang')) document.getElementById('set-lang').value = data.config.lang || 'id';
+        if(document.getElementById('set-mainTitle')) document.getElementById('set-mainTitle').value = data.config.mainTitle || '';
+        if(document.getElementById('set-hostTag')) document.getElementById('set-hostTag').value = data.config.hostTag || '';
+        if(document.getElementById('set-dashboardPort')) document.getElementById('set-dashboardPort').value = data.config.dashboardPort || 3080;
     } else { modal.classList.remove('active'); }
 }
 
-document.getElementById('settingsForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const configData = {
-        showCpu: document.getElementById('set-showCpu').checked, showRam: document.getElementById('set-showRam').checked,
-        showUptime: document.getElementById('set-showUptime').checked, showTemp: document.getElementById('set-showTemp').checked,
-        dashboardPort: parseInt(document.getElementById('set-dashboardPort').value) || 3080,
-        chartPoints: parseInt(document.getElementById('set-chartPoints').value) || 20, lang: document.getElementById('set-lang').value,
-        mainTitle: document.getElementById('set-mainTitle').value.trim(), hostTag: document.getElementById('set-hostTag').value.trim()
-    };
-    await fetch('/api/settings/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(configData) });
-    toggleSettingsModal(false); fetchData(); setTimeout(updateContainersMonitor, 500);
-});
+if(document.getElementById('settingsForm')) {
+    document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const configData = {
+            showCpu: document.getElementById('set-showCpu').checked, showRam: document.getElementById('set-showRam').checked,
+            showUptime: document.getElementById('set-showUptime').checked, showTemp: document.getElementById('set-showTemp').checked,
+            dashboardPort: parseInt(document.getElementById('set-dashboardPort').value) || 3080,
+            chartPoints: parseInt(document.getElementById('set-chartPoints').value) || 20, lang: document.getElementById('set-lang').value,
+            mainTitle: document.getElementById('set-mainTitle').value.trim(), hostTag: document.getElementById('set-hostTag').value.trim()
+        };
+        await fetch('/api/settings/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(configData) });
+        toggleSettingsModal(false); fetchData(); setTimeout(updateContainersMonitor, 500);
+    });
+}
 
 setInterval(fetchData, 2000);
 setInterval(updateContainersMonitor, 4000);
