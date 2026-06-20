@@ -353,3 +353,35 @@ setInterval(fetchData, 2000);
 setInterval(updateContainersMonitor, 4000);
 fetchData();
 updateContainersMonitor();
+
+// --- FUNGSI WAKTU REAL-TIME ---
+function updateTime() {
+    const now = new Date();
+    document.getElementById('live-time').innerText = now.toLocaleTimeString('id-ID', { hour12: false });
+}
+setInterval(updateTime, 1000);
+updateTime(); // Jalankan sekali saat load
+
+// --- FUNGSI CUACA (Menggunakan IP Geolocation gratis) ---
+async function fetchWeather() {
+    try {
+        // Mendapatkan lokasi berdasarkan IP (gratis & tanpa API Key)
+        const ipRes = await fetch('https://ipapi.co/json/');
+        const ipData = await ipRes.json();
+        const city = ipData.city;
+        
+        // Menampilkan lokasi
+        document.getElementById('location').innerText = city;
+
+        // Mengambil cuaca dari wttr.in (Sangat ringan untuk STB)
+        const weatherRes = await fetch(`https://wttr.in/${city}?format=%t`);
+        const temp = await weatherRes.text();
+        document.getElementById('temp').innerText = temp;
+    } catch (err) {
+        console.error("Gagal memuat cuaca:", err);
+        document.getElementById('location').innerText = "Lokasi Tidak Diketahui";
+    }
+}
+fetchWeather();
+// Update cuaca setiap 30 menit
+setInterval(fetchWeather, 1800000);

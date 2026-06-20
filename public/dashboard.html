@@ -176,6 +176,14 @@
             overflow: hidden;
             border: 1px solid #1f2937;
         }
+        @media (max-width: 640px) {
+        .header-info { 
+            width: 100%; 
+            border-top: 1px solid #1f2937; 
+            padding-top: 10px; 
+            margin-top: 5px; 
+            }
+        }
     </style>
 </head>
 <body>
@@ -183,6 +191,13 @@
 <div class="app-container">
     <div class="header">
         <div class="logo" id="main-app-logo">Sistem Pusat Kendali <span id="main-app-host">STB-SERVER</span></div>
+        <div class="header-info" style="text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #9ca3af;">
+            <div id="live-time" style="font-size: 16px; color: #ffffff; font-weight: 600;">--:--:--</div>
+            <div id="weather-info">
+                <span id="location">Mendeteksi lokasi...</span> | 
+                <span id="temp">--°C</span>
+            </div>
+        </div>
         <button class="btn settings-btn" id="btn-cockpit" onclick="toggleSettingsModal(true)"><i class="fa-solid fa-gear"></i> Pengaturan Sistem</button>
     </div>
 
