@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Pusat Kendali - Dashboard STB</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -13,36 +13,97 @@
         body { background-color: #0b111e; background-image: radial-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 0); background-size: 24px 24px; color: #e2e8f0; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; padding: 30px; display: flex; flex-direction: column; gap: 25px; }
         .app-container { max-width: 1400px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 25px; }
         
+        /* --- KODE ASLI ANDA --- */
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 20px; }
         .logo { font-size: 22px; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 10px; }
         .logo span { color: #00ffcc; background: rgba(0, 255, 204, 0.08); padding: 4px 10px; border-radius: 6px; font-size: 14px; font-weight: 600; }
         
         .btn { border: none; padding: 10px 18px; border-radius: 6px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; cursor: pointer; font-weight: 600; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px; }
         .settings-btn { background: rgba(0, 255, 204, 0.05); border: 1px solid rgba(0, 255, 204, 0.3); color: #00ffcc; }
-        .settings-btn:hover { background: #00ffcc; color: #0b111e; }
+        .settings-btn:hover { background: #00ffcc; color: #0b111e; box-shadow: 0 4px 12px rgba(0, 255, 204, 0.2); }
         .prune-btn { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; padding: 6px 12px; font-size: 11px; border-radius: 4px; }
+        .prune-btn:hover { background: #ef4444; color: white; }
 
         .main-layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 25px; }
         .status-sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; }
+        .card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; }
+        .card h3 { font-size: 13px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
         .card .value { font-size: 32px; font-weight: 700; color: #ffffff; }
         .card .value span { font-size: 16px; color: #6b7280; margin-left: 4px; }
-        
-        .services-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-        .monitor-rack { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 10px; min-height: 100px; }
-        .iframe-container { width: 100%; height: 500px; border-radius: 8px; overflow: hidden; border: 1px solid #1f2937; }
+        .chart-container { padding: 24px; }
+        canvas { width: 100% !important; height: 220px !important; margin-top: 15px; }
 
-        /* --- Perbaikan Responsif Mobile --- */
-        @media (max-width: 960px) {
-            .main-layout, .services-wrapper { grid-template-columns: 1fr; }
+        .icon-cpu { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
+        .icon-ram { color: #a855f7; text-shadow: 0 0 10px rgba(168, 85, 247, 0.4); }
+        .icon-uptime { color: #f59e0b; text-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+        .icon-temp { color: #f43f5e; text-shadow: 0 0 10px rgba(244, 63, 94, 0.4); }
+        .icon-sys-header { color: #38bdf8; }
+        .icon-docker-header { color: #2563eb; }
+
+        .services-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; width: 100%; }
+        .monitor-section { width: 100%; display: flex; flex-direction: column; gap: 15px; }
+        .monitor-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid #1f2937; padding-bottom: 8px; }
+        .monitor-section h2 { font-size: 15px; color: #ffffff; display: flex; align-items: center; gap: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .monitor-section h2 span { font-size: 12px; color: #6b7280; }
+        .monitor-rack { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 10px; min-height: 100px; }
+
+        .server-blade { background: #1f2937; border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; border: 1px solid transparent; transition: all 0.2s ease; }
+        .server-blade:hover { background: #2563eb0a; border-color: rgba(37, 99, 235, 0.2); }
+        .blade-left { display: flex; align-items: center; gap: 14px; width: 60%; }
+        .led { width: 9px; height: 9px; border-radius: 50%; }
+        .led-active { background: #00ffcc; box-shadow: 0 0 8px rgba(0, 255, 204, 0.6); animation: pulseLed 2s infinite ease-in-out; }
+        .led-offline { background: #f87171; box-shadow: 0 0 8px rgba(248, 113, 113, 0.5); }
+        @keyframes pulseLed { 0% { transform: scale(1); opacity: 1; box-shadow: 0 0 6px rgba(0, 255, 204, 0.5); } 50% { transform: scale(1.1); opacity: 0.7; box-shadow: 0 0 12px rgba(0, 255, 204, 0.8); } 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 6px rgba(0, 255, 204, 0.5); } }
+
+        .blade-details h4 { font-size: 14px; color: #ffffff; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .blade-details p { font-size: 11px; color: #9ca3af; margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+        .blade-network { font-size: 12px; color: #e2e8f0; width: 25%; font-family: 'JetBrains Mono', monospace; text-align: right; display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+        .blade-network i { color: #64748b; }
+        .blade-status-text { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: all 0.2s ease; z-index: 100; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal { background: #111827; border: 1px solid #1f2937; width: 90%; max-width: 440px; border-radius: 12px; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .modal-header h2 { font-size: 18px; font-weight: 700; color: #ffffff; }
+        .close-modal { background: none; border: none; color: #9ca3af; font-size: 20px; cursor: pointer; }
+        
+        .setting-section h4 { color: #38bdf8; font-size: 11px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        .toggle-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 14px; color: #e2e8f0; }
+        .save-btn { background: #00ffcc; color: #0b111e; width: 100%; padding: 12px; border-radius: 6px; margin-top: 20px; font-weight: 700; font-size: 14px; justify-content: center; }
+        .select-input, .text-input { background: #1f2937; border: 1px solid #374151; color: #ffffff; padding: 6px 10px; border-radius: 6px; font-size: 13px; outline: none; }
+        .text-input { width: 100%; padding: 8px 12px; }
+
+        .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(7, 10, 19, 0.8); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 200; }
+        .popup-overlay.active { opacity: 1; pointer-events: auto; }
+        .popup-box { background: #111827; border: 1px solid #1e293b; border-radius: 14px; padding: 24px; width: 90%; max-width: 400px; text-align: center; }
+        .popup-icon { font-size: 38px; margin-bottom: 16px; display: inline-block; }
+        .popup-icon.warn { color: #fbbf24; }
+        .popup-icon.success { color: #00ffcc; }
+        .popup-icon.error { color: #f87171; }
+        .popup-title { font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 10px; }
+        .popup-msg { font-size: 14px; color: #9ca3af; line-height: 1.5; margin-bottom: 22px; }
+        .popup-buttons { display: flex; justify-content: center; gap: 12px; }
+        .btn-pop-confirm { background: #00ffcc; color: #0b111e; font-weight: 700; padding: 10px 20px; border-radius: 6px; cursor: pointer; border: none; }
+        .btn-pop-cancel { background: #1f2937; border: 1px solid #374151; color: #9ca3af; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        .github-footer-link:hover { color: #00ffcc !important; transform: translateY(-3px); filter: drop-shadow(0 0 8px rgba(0, 255, 204, 0.6)); }
+
+        /* --- TAMBAHAN: OPTIMALISASI RESPONSIVITAS HANDPHONE (TIDAK MENGURANGI KODE ASLI) --- */
+        @media (max-width: 960px) { .main-layout, .services-wrapper { grid-template-columns: 1fr; } }
+        @media (max-width: 640px) {
+            body { padding: 12px; }
             .header { flex-direction: column; align-items: flex-start; gap: 15px; }
             .status-sidebar { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 640px) {
-            body { padding: 15px; }
-            .card .value { font-size: 24px; }
             .iframe-container { height: 300px; }
+            #card-disk { grid-column: span 2; }
+            .blade-left { width: 100%; }
+            .server-blade { flex-wrap: wrap; }
         }
+        
+        .file-manager-wrapper { margin-top: 25px; background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; }
+        .file-manager-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .file-manager-header h2 { font-size: 15px; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px; }
+        .iframe-container { width: 100%; height: 500px; border-radius: 8px; overflow: hidden; border: 1px solid #1f2937; }
     </style>
 </head>
 <body>
@@ -52,39 +113,114 @@
         <div class="logo" id="main-app-logo">Sistem Pusat Kendali <span id="main-app-host">STB-SERVER</span></div>
         <div class="header-info" style="text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #9ca3af;">
             <div id="live-time" style="font-size: 16px; color: #ffffff; font-weight: 600;">--:--:--</div>
-            <div id="weather-info"><span id="location">Mendeteksi lokasi...</span> | <span id="temp">--°C</span></div>
+            <div id="weather-info">
+                <span id="location">Mendeteksi lokasi...</span> | 
+                <span id="temp">--°C</span>
+            </div>
         </div>
-        <button class="btn settings-btn" onclick="toggleSettingsModal(true)"><i class="fa-solid fa-gear"></i> Pengaturan</button>
+        <button class="btn settings-btn" id="btn-cockpit" onclick="toggleSettingsModal(true)"><i class="fa-solid fa-gear"></i> Pengaturan Sistem</button>
     </div>
 
     <div class="main-layout">
-        <div class="card"><canvas id="cpuChart"></canvas></div>
+        <div class="card chart-container">
+            <h3 id="txt-chart-title"><i class="fa-solid fa-chart-line"></i> Grafik Beban Kerja Real-Time</h3>
+            <canvas id="cpuChart"></canvas>
+        </div>
         <div class="status-sidebar">
-            <div class="card"><h3>CPU</h3><div class="value" id="cpu-text">0%</div></div>
-            <div class="card"><h3>RAM</h3><div class="value" id="ram-text">0%</div></div>
-            <div class="card"><h3>UPTIME</h3><div class="value" id="uptime-text">0s</div></div>
-            <div class="card"><h3>TEMP</h3><div class="value" id="temp-text">0°C</div></div>
+            <div class="card" id="card-cpu"><h3><i class="fa-solid fa-microchip icon-cpu"></i> <span id="txt-lbl-cpu">Beban CPU</span></h3><div class="value" id="cpu-text">0<span>%</span></div></div>
+            <div class="card" id="card-ram"><h3><i class="fa-solid fa-memory icon-ram"></i> <span id="txt-lbl-ram">Penggunaan RAM</span></h3><div class="value" id="ram-text">0<span>%</span></div></div>
+            <div class="card" id="card-uptime"><h3><i class="fa-solid fa-clock icon-uptime"></i> <span id="txt-lbl-uptime">Waktu Aktif Sistem</span></h3><div class="value" id="uptime-text">0<span>s</span></div></div>
+            <div class="card" id="card-temp"><h3><i class="fa-solid fa-temperature-half icon-temp"></i> <span id="txt-lbl-temp">Suhu Perangkat</span></h3><div class="value" id="temp-text">0<span>°C</span></div></div>
+            <div class="card" id="card-disk"><h3><i class="fa-solid fa-hard-drive" style="color: #10b981;"></i> Penyimpanan</h3><div class="value" id="disk-text" style="font-size: 24px;">0<span>%</span></div><div style="font-size: 11px; color: #6b7280; margin-top: 5px;" id="disk-detail">0 / 0 GB</div></div>
         </div>
     </div>
 
     <div class="services-wrapper">
         <div class="monitor-section">
-            <div class="monitor-header"><h2>Layanan System</h2></div>
+            <div class="monitor-header">
+                <h2 id="txt-sys-title"><i class="fa-solid fa-server icon-sys-header"></i> Layanan Armbian System <span id="sys-count">(0)</span></h2>
+                <button class="btn prune-btn" style="visibility:hidden;"><i class="fa-solid fa-broom"></i> Clear</button>
+            </div>
             <div class="monitor-rack" id="system-services-container"></div>
         </div>
+        <div class="file-manager-wrapper">
+            <div class="file-manager-header">
+                <h2><i class="fa-solid fa-folder-open" style="color: #f59e0b;"></i> File Manager</h2>
+                <a href="http://192.168.18.188:8080" target="_blank" class="btn settings-btn" style="padding: 6px 12px; font-size: 11px;">
+                    <i class="fa-solid fa-up-right-from-square"></i> Buka Tab Baru
+                </a>
+            </div>
+            <div class="iframe-container">
+                <iframe src="http://192.168.18.10:8080" style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+        </div>
+
         <div class="monitor-section">
-            <div class="monitor-header"><h2>Kontainer Docker</h2><button class="btn prune-btn" onclick="pruneContainers()">Bersihkan</button></div>
+            <div class="monitor-header">
+                <h2 id="txt-docker-title"><i class="fa-solid fa-box-archive icon-docker-header"></i> Kontainer Docker <span id="docker-count">(0)</span></h2>
+                <button class="btn prune-btn" id="btn-purge" onclick="pruneContainers()"><i class="fa-solid fa-broom"></i> Bersihkan Kontainer Mati</button>
+            </div>
             <div class="monitor-rack" id="docker-services-container"></div>
         </div>
     </div>
 
-    <div class="file-manager-wrapper" style="background: #111827; padding: 20px; border-radius: 12px; border: 1px solid #1f2937;">
-        <h2>File Manager</h2>
-        <div class="iframe-container"><iframe src="http://192.168.18.10:8080" style="width:100%; height:100%; border:none;"></iframe></div>
+    <footer style="text-align: center; padding: 25px 20px; margin-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.03); font-family: 'JetBrains Mono', monospace; font-size: 12px;">
+        <div id="footer-text" style="color: #6b7280; margin-bottom: 12px;"></div>
+        <div id="dashboard-footer" style="display: none;"></div>
+        <a href="https://github.com/fjangky" target="_blank" rel="noopener noreferrer" class="github-footer-link" style="color: #9ca3af; font-size: 22px; transition: all 0.3s ease; display: inline-block; text-decoration: none;">
+            <i class="fa-brands fa-github"></i>
+        </a>
+    </footer>
+</div>
+
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+        <div class="modal-header"><h2 id="txt-modal-title">Konfigurasi Panel</h2><button class="close-modal" onclick="toggleSettingsModal(false)">&times;</button></div>
+        <form id="settingsForm">
+            <div class="setting-section" style="margin-bottom: 20px;">
+                <h4 id="txt-sec-identity">Identitas Perangkat</h4>
+                <div class="toggle-group" style="flex-direction: column; align-items: flex-start;">
+                    <label style="margin-bottom: 5px; font-size: 13px;" id="txt-lbl-title-input">Nama Sistem Utama</label>
+                    <input type="text" id="set-mainTitle" class="text-input">
+                </div>
+                <div class="toggle-group" style="flex-direction: column; align-items: flex-start; margin-top: 10px;">
+                    <label style="margin-bottom: 5px; font-size: 13px;" id="txt-lbl-host-input">Nama Host / Tag</label>
+                    <input type="text" id="set-hostTag" class="text-input">
+                </div>
+            </div>
+            <div class="setting-section" style="margin-bottom: 20px;">
+                <h4 id="txt-sec-lang">Bahasa Terpilih</h4>
+                <div class="toggle-group"><label id="txt-lbl-lang">Pilih Bahasa</label><select id="set-lang" class="select-input"><option value="id">Indonesia</option><option value="en">English</option></select></div>
+            </div>
+            <div class="setting-section" style="margin-top: 20px;">
+                <h4 id="txt-sec-network">Jaringan</h4>
+                <div class="toggle-group" style="flex-direction: column; align-items: flex-start;">
+                    <label style="margin-bottom: 5px; font-size: 13px;" id="txt-lbl-port">Port Dashboard</label>
+                    <input type="number" id="set-dashboardPort" class="text-input" placeholder="Contoh: 3000">
+                </div>
+            </div>
+            <div class="setting-section">
+                <h4 id="txt-sec-tele">Modul Pemantauan</h4>
+                <div class="toggle-group"><label id="txt-opt-cpu">Pantau Status CPU</label><input type="checkbox" id="set-showCpu"></div>
+                <div class="toggle-group"><label id="txt-opt-ram">Pantau Status RAM</label><input type="checkbox" id="set-showRam"></div>
+                <div class="toggle-group"><label id="txt-opt-uptime">Pantau Waktu Aktif</label><input type="checkbox" id="set-showUptime"></div>
+                <div class="toggle-group"><label id="txt-opt-temp">Pantau Suhu Inti</label><input type="checkbox" id="set-showTemp"></div>
+                <div class="toggle-group" style="margin-top: 15px;"><label id="txt-opt-chart">Titik Segarkan Grafik</label><input type="number" id="set-chartPoints" min="5" max="50" class="select-input" style="width: 65px; text-align: center;"></div>
+            </div>
+            <button type="submit" class="btn save-btn" id="btn-save-config">Simpan Konfigurasi</button>
+        </form>
     </div>
 </div>
 
-<div id="settingsModal" class="modal-overlay"><div class="modal">...</div></div>
+<div class="popup-overlay" id="customPopup">
+    <div class="popup-box">
+        <div class="popup-icon" id="pop-icon"></div>
+        <div class="popup-title" id="pop-title"></div>
+        <div class="popup-msg" id="pop-message"></div>
+        <div class="popup-buttons" id="pop-buttons"></div>
+    </div>
+</div>
+
 <script src="script.js?v=100"></script>
 </body>
 </html>
