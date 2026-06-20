@@ -97,7 +97,6 @@
         .btn-pop-confirm { background: #00ffcc; color: #0b111e; font-weight: 700; padding: 10px 20px; border-radius: 6px; cursor: pointer; border: none; }
         .btn-pop-cancel { background: #1f2937; border: 1px solid #374151; color: #9ca3af; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
 
-        /* Gaya Khusus Hover Ikon GitHub */
         .github-footer-link:hover {
             color: #00ffcc !important;
             transform: translateY(-3px);
@@ -105,7 +104,42 @@
         }
 
         @media (max-width: 960px) { .main-layout { grid-template-columns: 1fr; } }
-        @media (max-width: 540px) { body { padding: 15px; } .status-sidebar { grid-template-columns: 1fr; } .server-blade { flex-direction: column; align-items: flex-start; gap: 10px; } .blade-left, .blade-network { width: 100%; text-align: left; justify-content: flex-start; } }
+        
+        /* --- OPTIMALISASI SEPENUHNYA UNTUK HANDPHONE (MEDIA QUERY LAYAR KECIL) --- */
+        @media (max-width: 640px) {
+            body { padding: 12px; gap: 15px; }
+            .app-container { gap: 15px; }
+            
+            /* Susunan Atas (Header & Tombol) */
+            .header { flex-direction: column; align-items: flex-start; gap: 12px; padding-bottom: 15px; }
+            .logo { font-size: 18px; width: 100%; justify-content: space-between; }
+            .settings-btn { width: 100%; justify-content: center; padding: 12px; }
+
+            /* Grafik Fleksibel */
+            .main-layout { grid-template-columns: 1fr; gap: 15px; }
+            .chart-container { padding: 16px; }
+            canvas { height: 180px !important; }
+
+            /* Grid Indikator Status - Dibagi 2 Kolom Agar Ringkas */
+            .status-sidebar { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            #card-disk { grid-column: span 2; } /* Card penyimpanan melebar penuh di bawah */
+            .card { padding: 16px; }
+            .card h3 { font-size: 11px; margin-bottom: 8px; }
+            .card .value { font-size: 24px; }
+
+            /* List Layanan & Docker Blade */
+            .monitor-header h2 { font-size: 13px; }
+            .server-blade { padding: 12px; flex-wrap: wrap; gap: 8px; }
+            .blade-left { width: 100%; }
+            .blade-details h4 { font-size: 13px; }
+            .blade-network { width: auto; text-align: left; justify-content: flex-start; font-size: 11px; color: #9ca3af; }
+            .blade-status-text { margin-left: auto; }
+
+            /* Jendela Pengaturan */
+            .modal { padding: 20px; width: 95%; }
+            .modal-header h2 { font-size: 16px; }
+            .toggle-group { font-size: 13px; }
+        }
     </style>
 </head>
 <body>
