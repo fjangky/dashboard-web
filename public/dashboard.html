@@ -33,6 +33,16 @@
         .chart-container { padding: 24px; }
         canvas { width: 100% !important; height: 220px !important; margin-top: 15px; }
 
+        /* Pewarnaan Ikon Hardware Berwarna Menarik (Glowing effect) */
+        .icon-cpu { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }          /* Biru Muda Cerah */
+        .icon-ram { color: #a855f7; text-shadow: 0 0 10px rgba(168, 85, 247, 0.4); }          /* Ungu Neon */
+        .icon-uptime { color: #f59e0b; text-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }       /* Amber/Orange */
+        .icon-temp { color: #f43f5e; text-shadow: 0 0 10px rgba(244, 63, 94, 0.4); }          /* Merah Rose */
+
+        /* Pewarnaan Ikon Judul Rak */
+        .icon-sys-header { color: #38bdf8; }
+        .icon-docker-header { color: #2563eb; }
+
         .services-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; width: 100%; }
         @media (max-width: 1100px) { .services-wrapper { grid-template-columns: 1fr; } }
 
@@ -118,7 +128,7 @@
     <div class="services-wrapper">
         <div class="monitor-section">
             <div class="monitor-header">
-                <h2 id="txt-sys-title"><i class="fa-solid fa-linux"></i> Layanan Armbian System <span id="sys-count">(0)</span></h2>
+                <h2 id="txt-sys-title"><i class="fa-solid fa-server icon-sys-header"></i> Layanan Armbian System <span id="sys-count">(0)</span></h2>
                 <button class="btn prune-btn" style="visibility:hidden;"><i class="fa-solid fa-broom"></i> Clear</button>
             </div>
             <div class="monitor-rack" id="system-services-container"></div>
@@ -126,7 +136,7 @@
 
         <div class="monitor-section">
             <div class="monitor-header">
-                <h2 id="txt-docker-title"><i class="fa-solid fa-box-archive"></i> Kontainer Docker <span id="docker-count">(0)</span></h2>
+                <h2 id="txt-docker-title"><i class="fa-solid fa-box-archive icon-docker-header"></i> Kontainer Docker <span id="docker-count">(0)</span></h2>
                 <button class="btn prune-btn" id="btn-purge" onclick="pruneContainers()"><i class="fa-solid fa-broom"></i> Bersihkan Kontainer Mati</button>
             </div>
             <div class="monitor-rack" id="docker-services-container"></div>
