@@ -33,13 +33,11 @@
         .chart-container { padding: 24px; }
         canvas { width: 100% !important; height: 220px !important; margin-top: 15px; }
 
-        /* Pewarnaan Ikon Hardware Berwarna Menarik (Glowing effect) */
-        .icon-cpu { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }          /* Biru Muda Cerah */
-        .icon-ram { color: #a855f7; text-shadow: 0 0 10px rgba(168, 85, 247, 0.4); }          /* Ungu Neon */
-        .icon-uptime { color: #f59e0b; text-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }       /* Amber/Orange */
-        .icon-temp { color: #f43f5e; text-shadow: 0 0 10px rgba(244, 63, 94, 0.4); }          /* Merah Rose */
+        .icon-cpu { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
+        .icon-ram { color: #a855f7; text-shadow: 0 0 10px rgba(168, 85, 247, 0.4); }
+        .icon-uptime { color: #f59e0b; text-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+        .icon-temp { color: #f43f5e; text-shadow: 0 0 10px rgba(244, 63, 94, 0.4); }
 
-        /* Pewarnaan Ikon Judul Rak */
         .icon-sys-header { color: #38bdf8; }
         .icon-docker-header { color: #2563eb; }
 
@@ -57,7 +55,6 @@
         
         .blade-left { display: flex; align-items: center; gap: 14px; width: 60%; }
         
-        /* Animasi LED Berkedip */
         .led { width: 9px; height: 9px; border-radius: 50%; }
         .led-active { background: #00ffcc; box-shadow: 0 0 8px rgba(0, 255, 204, 0.6); animation: pulseLed 2s infinite ease-in-out; }
         .led-offline { background: #f87171; box-shadow: 0 0 8px rgba(248, 113, 113, 0.5); }
@@ -100,6 +97,13 @@
         .btn-pop-confirm { background: #00ffcc; color: #0b111e; font-weight: 700; padding: 10px 20px; border-radius: 6px; cursor: pointer; border: none; }
         .btn-pop-cancel { background: #1f2937; border: 1px solid #374151; color: #9ca3af; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
 
+        /* Gaya Khusus Hover Ikon GitHub */
+        .github-footer-link:hover {
+            color: #00ffcc !important;
+            transform: translateY(-3px);
+            filter: drop-shadow(0 0 8px rgba(0, 255, 204, 0.6));
+        }
+
         @media (max-width: 960px) { .main-layout { grid-template-columns: 1fr; } }
         @media (max-width: 540px) { body { padding: 15px; } .status-sidebar { grid-template-columns: 1fr; } .server-blade { flex-direction: column; align-items: flex-start; gap: 10px; } .blade-left, .blade-network { width: 100%; text-align: left; justify-content: flex-start; } }
     </style>
@@ -122,8 +126,7 @@
             <div class="card" id="card-ram"><h3><i class="fa-solid fa-memory icon-ram"></i> <span id="txt-lbl-ram">Penggunaan RAM</span></h3><div class="value" id="ram-text">0<span>%</span></div></div>
             <div class="card" id="card-uptime"><h3><i class="fa-solid fa-clock icon-uptime"></i> <span id="txt-lbl-uptime">Waktu Aktif Sistem</span></h3><div class="value" id="uptime-text">0<span>s</span></div></div>
             <div class="card" id="card-temp"><h3><i class="fa-solid fa-temperature-half icon-temp"></i> <span id="txt-lbl-temp">Suhu Perangkat</span></h3><div class="value" id="temp-text">0<span>°C</span></div></div>
-            <div class="card" id="card-disk"><h3><i class="fa-solid fa-hard-drive" style="color: #10b981;"></i> Penyimpanan</h3><div class="value" id="disk-text" style="font-size: 24px;">0<span>%</span></div><div style="font-size: 11px; color: #6b7280; margin-top: 5px;" id="disk-detail">0 / 0 GB</div>
-</div>
+            <div class="card" id="card-disk"><h3><i class="fa-solid fa-hard-drive" style="color: #10b981;"></i> Penyimpanan</h3><div class="value" id="disk-text" style="font-size: 24px;">0<span>%</span></div><div style="font-size: 11px; color: #6b7280; margin-top: 5px;" id="disk-detail">0 / 0 GB</div></div>
         </div>
     </div>
 
@@ -144,6 +147,14 @@
             <div class="monitor-rack" id="docker-services-container"></div>
         </div>
     </div>
+
+    <footer style="text-align: center; padding: 25px 20px; margin-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.03); font-family: 'JetBrains Mono', monospace; font-size: 12px;">
+        <div id="footer-text" style="color: #6b7280; margin-bottom: 12px;"></div>
+        <div id="dashboard-footer" style="display: none;"></div>
+        <a href="https://github.com/fjangky" target="_blank" rel="noopener noreferrer" class="github-footer-link" style="color: #9ca3af; font-size: 22px; transition: all 0.3s ease; display: inline-block; text-decoration: none;">
+            <i class="fa-brands fa-github"></i>
+        </a>
+    </footer>
 </div>
 
 <div class="modal-overlay" id="settingsModal">
@@ -194,20 +205,6 @@
     </div>
 </div>
 
-<script src="script.js?v=99"></script>
+<script src="script.js?v=100"></script>
 </body>
-<footer style="text-align: center; padding: 25px 20px; margin-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.03); font-family: 'JetBrains Mono', monospace; font-size: 12px;">
-    <div id="footer-text" style="color: #6b7280; margin-bottom: 12px;">
-        </div>
-    <a href="https://github.com/fjangky" target="_blank" rel="noopener noreferrer" class="github-footer-link" style="color: #9ca3af; font-size: 22px; transition: all 0.3s ease; display: inline-block; text-decoration: none;">
-        <i class="fa-brands fa-github"></i>
-    </a>
-</footer>
-<style>
-    .github-footer-link:hover {
-        color: #00ffcc !important;
-        transform: translateY(-3px);
-        filter: drop-shadow(0 0 8px rgba(0, 255, 204, 0.6));
-    }
-</style>
 </html>
