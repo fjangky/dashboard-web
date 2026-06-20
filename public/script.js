@@ -139,6 +139,10 @@ function applyLanguage(lang) {
     document.getElementById('txt-sec-network').innerText = l.secNetwork;
     document.getElementById('txt-lbl-port').innerText = l.lblPort;
     document.getElementById('dashboard-footer').innerHTML = l.copyright;
+    const footerEl = document.getElementById('footer-text');
+    if (footerEl) {
+        footerEl.innerHTML = l.copyright;
+    }
 }
 
 // --- PEMBUATAN GRADASI DAN KONFIGURASI GRAFIK ELEGAN ---
