@@ -364,11 +364,14 @@ updateTime(); // Jalankan sekali saat load
 
 // --- FUNGSI CUACA (Menggunakan IP Geolocation gratis) ---
 async function fetchWeather() {
+    const locationEl = document.getElementById('location');
+    const tempEl = document.getElementById('temp');
     try {
         // Mendapatkan lokasi berdasarkan IP (gratis & tanpa API Key)
         const ipRes = await fetch('https://ipapi.co/json/');
         const ipData = await ipRes.json();
-        const city = ipData.city;
+        const city = ipData.city || "Jakarta";
+        locationEl.innerText = city;
         
         // Menampilkan lokasi
         document.getElementById('location').innerText = city;
