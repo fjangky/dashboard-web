@@ -24,7 +24,6 @@ function writeConfig(config) {
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
 }
 
-// Helper untuk menjalankan perintah terminal Linux (Promise-based)
 function runCommand(cmd) {
     return new Promise((resolve) => {
         exec(cmd, (error, stdout, stderr) => {
@@ -37,10 +36,8 @@ function runCommand(cmd) {
     });
 }
 
-// Logika pemindaian otomatis seluruh aplikasi native berdasarkan Port jaringan terbuka
-async function scanNativeServices() {
-    // Mengambil port TCP/UDP yang sedang LISTEN beserta nama prosesnya
-    // Memerlukan hak akses tinggi (sudo/root) untuk membaca segmen users:(("proses"))
+// Logika pemindaian otomatis aplikasi Native OS yang sudah difilter
+async function scanNativeServices(aaPanelPort) {
     const stdout = await runCommand('sudo ss -tulpn | grep LISTEN');
     if (!stdout) return [];
 
@@ -55,10 +52,16 @@ async function scanNativeServices() {
             const port = portMatch[1];
             let procName = processMatch[1];
 
-            // Abaikan docker-proxy agar aplikasi di dalam Docker tidak masuk ke list native OS
+            // 1. Abaikan proxy internal docker agar tidak duplikat dengan kontainer
             if (procName === 'docker-proxy') return;
 
-            // Kelompokkan port jika berasal dari aplikasi/layanan native OS yang sama
+            // 2. FILTER UTAMA: Jika port yang terdeteksi adalah port aaPanel, atau nama prosesnya berkaitan dengan web server bawaan panel (httpd, nginx, php-fpm)
+            // Maka kita abaikan/block agar tidak muncul sebagai aplikasi terpisah di dashboard
+            if (port === aaPanelPort || ['httpd', 'nginx', 'apache2', 'mysqld'].includes(procName.toLowerCase())) {
+                return; 
+            }
+
+            // Kelompokkan port layanan native lainnya (misal: SSH, Mosquitto, dll)
             if (servicesMap.has(procName)) {
                 const existing = servicesMap.get(procName);
                 if (!existing.ports.includes(port)) {
@@ -77,7 +80,6 @@ async function scanNativeServices() {
         }
     });
 
-    // Ubah array kumpulan port menjadi format string (misal: "80, 443")
     return Array.from(servicesMap.values()).map(s => {
         s.ports = s.ports.join(', ');
         return s;
@@ -123,7 +125,6 @@ app.post('/api/settings/config', (req, res) => {
     writeConfig(newConfig);
     res.json({ success: true, message: "Konfigurasi tersimpan. Merestart aplikasi..." });
 
-    // Auto-restart sistem menggunakan PM2 agar port baru langsung aktif
     setTimeout(() => {
         exec('pm2 restart dashboard-stb', (err) => {
             if (err) console.log("Gagal auto-restart, pastikan PM2 terpasang.");
@@ -134,23 +135,24 @@ app.post('/api/settings/config', (req, res) => {
 app.get('/api/services', async (req, res) => {
     let systemServices = [];
     const dockerServices = [];
+    let aaPanelPortActual = "8888"; // Default fallback port
 
-    // Fungsi deteksi aaPanel yang ditingkatkan (Membaca file port.pl)
+    // Fungsi deteksi aaPanel mandiri
     const checkAapanel = () => new Promise((resolve) => {
         const portFile = '/www/server/panel/data/port.pl';
         fs.readFile(portFile, 'utf8', (err, data) => {
             if (err) {
-                // Fallback: Jika file tidak bisa dibaca, gunakan deteksi port umum
                 exec("ss -tuln | grep -E '8888|81|82'", (err2, stdout) => {
                     systemServices.push({
                         id: "SYS-01", name: "aaPanel", image: "Native OS",
                         state: stdout ? "running" : "stopped",
-                        ports: stdout ? "Detected" : "N/A", type: "system"
+                        ports: stdout ? "8888" : "N/A", type: "system"
                     });
                     resolve();
                 });
             } else {
                 const port = data.trim();
+                aaPanelPortActual = port; // Simpan port asli aaPanel untuk filter nanti
                 exec(`ss -tuln | grep :${port}`, (err3, stdout) => {
                     systemServices.push({
                         id: "SYS-01", name: "aaPanel", image: "Native OS",
@@ -164,20 +166,20 @@ app.get('/api/services', async (req, res) => {
     });
 
     try {
-        // 1. Jalankan deteksi manual aaPanel bawaan Anda
+        // 1. Jalankan deteksi terisolasi aaPanel
         await checkAapanel();
 
-        // 2. Jalankan deteksi otomatis aplikasi Native OS via Port Terbuka
-        const autoNative = await scanNativeServices();
+        // 2. Ambil aplikasi native lain dengan menyertakan filter port/nama webserver bawaan aaPanel
+        const autoNative = await scanNativeServices(aaPanelPortActual);
         
-        // Gabungkan deteksi manual aaPanel dengan deteksi otomatis port (hindari nama ganda jika aaPanel terdeteksi kembali)
         autoNative.forEach(service => {
-            if (service.name !== 'AAPANEL') {
+            // Memastikan duplikasi nama bertema "AAPANEL" dari pemindaian port tidak dimasukkan lagi
+            if (service.name !== 'AAPANEL' && service.name !== 'PANEL') {
                 systemServices.push(service);
             }
         });
 
-        // 3. Jalankan pemindaian otomatis Kontainer Docker via Dockerode
+        // 3. Ambil data kontainer Docker (Id dan Image tetap dipertahankan)
         const containers = await docker.listContainers({ all: true });
         containers.forEach(c => {
             const portMap = c.Ports.map(p => p.PublicPort ? `${p.PublicPort}:${p.PrivatePort}` : p.PrivatePort);
