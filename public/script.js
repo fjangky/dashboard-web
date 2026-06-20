@@ -364,26 +364,25 @@ async function fetchWeather() {
     const locationEl = document.getElementById('location');
     const tempEl = document.getElementById('temp');
     if (!locationEl || !tempEl) return;
-    
+
     try {
+        // 1. Dapatkan lokasi dan koordinat via IP
         const ipRes = await fetch('https://ipapi.co/json/');
         const ipData = await ipRes.json();
         const city = ipData.city || "Jakarta";
+        const lat = ipData.latitude;
+        const lon = ipData.longitude;
+        
         locationEl.innerText = city;
 
-        // Gunakan parameter ?format=%t untuk meminta hanya suhu, 
-        // dan User-Agent 'curl' agar wttr.in tidak mengirimkan desain terminal yang panjang.
-        const weatherRes = await fetch(`https://wttr.in/${city}?format=%t`, {
-            headers: { 'User-Agent': 'curl/7.64.1' }
-        });
+        // 2. Gunakan Open-Meteo (API gratis, tanpa key, format JSON murni)
+        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m`);
+        const data = await weatherRes.json();
         
-        const rawText = await weatherRes.text();
+        // 3. Ambil suhu dan tampilkan
+        const temp = data.current.temperature_2m;
+        tempEl.innerText = `${temp}°C`;
         
-        // REGEX PENTING: Membersihkan semua karakter kecuali angka, derajat, minus, dan C.
-        // Ini akan menghilangkan semua "sampah" teks yang muncul di layar Anda sekarang.
-        const cleanTemp = rawText.replace(/[^0-9°C-]/g, '');
-        
-        tempEl.innerText = cleanTemp || "--";
     } catch (err) {
         console.error("Gagal memuat cuaca:", err);
         locationEl.innerText = "N/A";
