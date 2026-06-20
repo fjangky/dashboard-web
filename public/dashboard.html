@@ -9,11 +9,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body { 
             background-color: #0b111e; 
@@ -31,185 +27,41 @@
             gap: 25px; 
         }
 
-        .app-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
+        .app-container { max-width: 1400px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 25px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 20px; }
+        .logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: #ffffff; display: flex; align-items: center; gap: 10px; }
+        .logo span { color: #00ffcc; background: rgba(0, 255, 204, 0.08); padding: 4px 10px; border-radius: 6px; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; }
+        
+        .btn { border: none; padding: 10px 18px; border-radius: 6px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; cursor: pointer; font-weight: 600; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px; }
+        .settings-btn { background: rgba(0, 255, 204, 0.05); border: 1px solid rgba(0, 255, 204, 0.3); color: #00ffcc; }
+        .settings-btn:hover { background: #00ffcc; color: #0b111e; box-shadow: 0 4px 12px rgba(0, 255, 204, 0.2); }
+        .prune-btn { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
+        .prune-btn:hover { background: #ef4444; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
 
-        /* HEADER SECTION */
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border-bottom: 1px solid #1e293b; 
-            padding-bottom: 20px;
-        }
-        .logo { 
-            font-size: 22px; 
-            font-weight: 700; 
-            letter-spacing: -0.5px;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .logo span { 
-            color: #00ffcc; 
-            background: rgba(0, 255, 204, 0.08);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
+        .main-layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 25px; align-items: stretch; }
+        .status-sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         
-        /* TOMBOL KUSTOM */
-        .btn { 
-            border: none; 
-            padding: 10px 18px; 
-            border-radius: 6px; 
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 13px; 
-            cursor: pointer; 
-            font-weight: 600; 
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .settings-btn { 
-            background: rgba(0, 255, 204, 0.05); 
-            border: 1px solid rgba(0, 255, 204, 0.3); 
-            color: #00ffcc; 
-        }
-        .settings-btn:hover { 
-            background: #00ffcc; 
-            color: #0b111e; 
-            box-shadow: 0 4px 12px rgba(0, 255, 204, 0.2);
-        }
-        
-        .prune-btn { 
-            background: rgba(239, 68, 68, 0.1); 
-            border: 1px solid rgba(239, 68, 68, 0.3); 
-            color: #f87171; 
-        }
-        .prune-btn:hover { 
-            background: #ef4444; 
-            color: white; 
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); 
-        }
-
-        /* GRID PANEL HARWARE */
-        .main-layout { 
-            display: grid; 
-            grid-template-columns: 1.5fr 1fr; 
-            gap: 25px; 
-            align-items: stretch; 
-        }
-        
-        .status-sidebar { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 20px; 
-        }
-        
-        .card { 
-            background: #111827; 
-            border: 1px solid #1f2937; 
-            border-radius: 12px; 
-            padding: 24px; 
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: border-color 0.2s ease;
-        }
+        .card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; transition: border-color 0.2s ease; }
         .card:hover { border-color: #374151; }
-        
-        .card h3 { 
-            font-size: 13px; 
-            color: #9ca3af; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px; 
-            margin-bottom: 12px; 
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-        }
+        .card h3 { font-size: 13px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; font-weight: 600; }
         
         .icon-cpu { color: #00ffcc; }
         .icon-ram { color: #c084fc; }
         .icon-uptime { color: #fbbf24; }
         .icon-temp { color: #f87171; }
 
-        .card .value { 
-            font-size: 32px; 
-            font-weight: 700; 
-            color: #ffffff; 
-        }
-        .card .value span { 
-            font-size: 16px; 
-            color: #6b7280; 
-            margin-left: 4px;
-            font-weight: 500;
-        }
-        
+        .card .value { font-size: 32px; font-weight: 700; color: #ffffff; }
+        .card .value span { font-size: 16px; color: #6b7280; margin-left: 4px; font-weight: 500; }
         .chart-container { padding: 24px; }
-        canvas { 
-            width: 100% !important; 
-            height: 220px !important; 
-            margin-top: 15px;
-        }
+        canvas { width: 100% !important; height: 220px !important; margin-top: 15px; }
 
-        /* DOCKER SECTION */
-        .monitor-section { 
-            width: 100%; 
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .monitor-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        .monitor-section h2 { 
-            font-size: 18px; 
-            color: #ffffff; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            font-weight: 600;
-        }
-        
-        .monitor-rack { 
-            background: #111827; 
-            border: 1px solid #1f2937;
-            border-radius: 12px; 
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+        .monitor-section { width: 100%; display: flex; flex-direction: column; gap: 15px; }
+        .monitor-header { display: flex; justify-content: space-between; align-items: center; }
+        .monitor-section h2 { font-size: 18px; color: #ffffff; display: flex; align-items: center; gap: 10px; font-weight: 600; }
+        .monitor-rack { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
 
-        .server-blade { 
-            background: #1f2937; 
-            border: 1px solid transparent;
-            border-radius: 8px;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.2s ease;
-        }
-        .server-blade:hover {
-            background: #2563eb0a;
-            border-color: rgba(37, 99, 235, 0.2);
-        }
+        .server-blade { background: #1f2937; border: 1px solid transparent; border-radius: 8px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease; }
+        .server-blade:hover { background: #2563eb0a; border-color: rgba(37, 99, 235, 0.2); }
 
         .blade-left { display: flex; align-items: center; gap: 16px; width: 50%; }
         .led { width: 10px; height: 10px; border-radius: 50%; background: #4b5563; }
@@ -222,21 +74,9 @@
         .blade-network i { color: #64748b; }
         .blade-status-text { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.03); text-transform: uppercase; }
 
-        /* PANEL CONFIG / MODAL */
-        .modal-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); 
-            display: flex; justify-content: center; align-items: center; 
-            opacity: 0; pointer-events: none; transition: all 0.2s ease; z-index: 100; 
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: all 0.2s ease; z-index: 100; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        
-        .modal { 
-            background: #111827; border: 1px solid #1f2937; 
-            width: 90%; max-width: 440px; border-radius: 12px; padding: 28px; 
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-            max-height: 85vh; overflow-y: auto;
-        }
+        .modal { background: #111827; border: 1px solid #1f2937; width: 90%; max-width: 440px; border-radius: 12px; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); max-height: 85vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .modal-header h2 { font-size: 18px; font-weight: 700; color: #ffffff; }
         .close-modal { background: none; border: none; color: #9ca3af; font-size: 20px; cursor: pointer; }
@@ -249,20 +89,9 @@
         .text-input { width: 100%; background: #1f2937; border: 1px solid #374151; color: #ffffff; padding: 8px 12px; border-radius: 6px; font-size: 13px; outline: none; transition: border-color 0.2s; }
         .text-input:focus { border-color: #00ffcc; }
 
-        /* POPUP ALERT & CONFIRM KUSTOM */
-        .popup-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(7, 10, 19, 0.8); backdrop-filter: blur(4px);
-            display: flex; justify-content: center; align-items: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 200;
-        }
+        .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(7, 10, 19, 0.8); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 200; }
         .popup-overlay.active { opacity: 1; pointer-events: auto; }
-        .popup-box {
-            background: #111827; border: 1px solid #1e293b; border-radius: 14px;
-            padding: 24px; width: 90%; max-width: 400px; text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            transform: scale(0.9); transition: transform 0.2s ease;
-        }
+        .popup-box { background: #111827; border: 1px solid #1e293b; border-radius: 14px; padding: 24px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transform: scale(0.9); transition: transform 0.2s ease; }
         .popup-overlay.active .popup-box { transform: scale(1); }
         .popup-icon { font-size: 38px; margin-bottom: 16px; display: inline-block; }
         .popup-icon.warn { color: #fbbf24; }
@@ -337,6 +166,7 @@
                     </select>
                 </div>
             </div>
+
             <div class="setting-section">
                 <h4 id="txt-sec-tele">Modul Pemantauan</h4>
                 <div class="toggle-group"><label id="txt-opt-cpu">Pantau Status CPU</label><input type="checkbox" id="set-showCpu"></div>

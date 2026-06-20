@@ -178,7 +178,6 @@ async function fetchData() {
         
         maxChartPoints = data.config.chartPoints;
 
-        // Render Teks Dinamis Hasil Input Kustomisasi
         const finalTitle = data.config.mainTitle || "Sistem Pusat Kendali";
         const finalHost = data.config.hostTag || "STB-SERVER";
         document.getElementById('main-app-logo').innerHTML = `${finalTitle} <span id="main-app-host">${finalHost}</span>`;
@@ -201,37 +200,39 @@ async function fetchData() {
 
 async function updateContainersMonitor() {
     try {
-        const res = await fetch('/api/containers');
-        const containers = await res.json();
+        const res = await fetch('/api/services');
+        const services = await res.json();
         
         const l = dictionary[currentLang];
-        document.getElementById('txt-rack-title').innerHTML = l.rackTitle.replace('$count', containers.length);
+        document.getElementById('txt-rack-title').innerHTML = l.rackTitle.replace('$count', services.length);
 
         const containerBox = document.getElementById('containers-container');
         containerBox.innerHTML = '';
 
-        if(containers.length === 0) {
+        if(services.length === 0) {
             containerBox.innerHTML = `<p style="color: #9ca3af; font-size: 14px; padding: 15px; text-align: center;">${l.rackEmpty}</p>`;
             return;
         }
 
-        containers.forEach(c => {
-            const isRunning = c.state === 'running';
+        services.forEach(s => {
+            const isRunning = s.state === 'running';
             const ledClass = isRunning ? 'led-active' : 'led-offline';
             const statusColor = isRunning ? '#00ffcc' : '#f87171';
             const statusBg = isRunning ? 'rgba(0, 255, 204, 0.05)' : 'rgba(248, 113, 113, 0.05)';
             const statusText = isRunning ? (currentLang === 'id' ? 'Aktif' : 'Active') : (currentLang === 'id' ? 'Berhenti' : 'Stopped');
             
+            const typeIcon = s.type === 'system' ? '<i class="fa-solid fa-linux"></i>' : '<i class="fa-solid fa-ethernet"></i>';
+
             containerBox.innerHTML += `
                 <div class="server-blade">
                     <div class="blade-left">
                         <div class="led-panel"><div class="led ${ledClass}"></div></div>
                         <div class="blade-details">
-                            <h4>${c.name}</h4>
-                            <p>ID: ${c.id} | Image: ${c.image}</p>
+                            <h4>${s.name} ${s.type === 'system' ? '<span style="font-size:10px; color:#38bdf8; border:1px solid #38bdf8; padding:1px 4px; border-radius:4px; margin-left:6px;">OS</span>' : ''}</h4>
+                            <p>ID: ${s.id} | Base: ${s.image}</p>
                         </div>
                     </div>
-                    <div class="blade-network"><i class="fa-solid fa-ethernet"></i> Port: ${c.ports}</div>
+                    <div class="blade-network">${typeIcon} Port: ${s.ports}</div>
                     <div class="blade-status-text" style="color: ${statusColor}; background: ${statusBg};">
                         ${statusText}
                     </div>
@@ -279,7 +280,6 @@ async function toggleSettingsModal(show) {
         document.getElementById('set-showTemp').checked = data.config.showTemp || false;
         document.getElementById('set-chartPoints').value = data.config.chartPoints;
         document.getElementById('set-lang').value = data.config.lang || 'id';
-        // Isi nilai input kustom
         document.getElementById('set-mainTitle').value = data.config.mainTitle || '';
         document.getElementById('set-hostTag').value = data.config.hostTag || '';
     } else { modal.classList.remove('active'); }
