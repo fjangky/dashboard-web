@@ -68,26 +68,30 @@ app.get('/api/services', async (req, res) => {
     const systemServices = [];
     const dockerServices = [];
 
-    // Deteksi aaPanel
+    // Fungsi deteksi aaPanel yang ditingkatkan (Membaca file port.pl)
     const checkAapanel = () => new Promise((resolve) => {
-        exec("ps aux | grep 'aapanel' | grep -v 'grep'", (err, stdout) => {
-         if (stdout.length > 0) {
-            exec("ss -tuln | grep -i 'python' | awk '{print $5}' | cut -d: -f2", (err2, stdout2) => {
-                const port = stdout2.trim() || "82"; // Default ke 82 jika ss tidak mendeteksi   
-                systemServices.push({
-                    id: "SYS-01", name: "aaPanel", image: "Native OS",
-                    state: "running",
-                    ports: port, type: "system"
+        const portFile = '/www/server/panel/data/port.pl';
+        fs.readFile(portFile, 'utf8', (err, data) => {
+            if (err) {
+                // Fallback: Jika file tidak bisa dibaca, gunakan deteksi port umum
+                exec("ss -tuln | grep -E '8888|81|82'", (err2, stdout) => {
+                    systemServices.push({
+                        id: "SYS-01", name: "aaPanel", image: "Native OS",
+                        state: stdout ? "running" : "stopped",
+                        ports: stdout ? "Detected" : "N/A", type: "system"
+                    });
+                    resolve();
                 });
-                resolve();
-            });
             } else {
-                systemServices.push({
-                    id: "SYS-01", name: "aaPanel", image: "Native OS",
-                    state: "stopped",
-                    ports: "N/A", type: "system"
+                const port = data.trim();
+                exec(`ss -tuln | grep :${port}`, (err3, stdout) => {
+                    systemServices.push({
+                        id: "SYS-01", name: "aaPanel", image: "Native OS",
+                        state: stdout ? "running" : "stopped",
+                        ports: port, type: "system"
+                    });
+                    resolve();
                 });
-                resolve();
             }
         });
     });
