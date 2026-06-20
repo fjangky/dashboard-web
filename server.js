@@ -36,7 +36,7 @@ function runCommand(cmd) {
     });
 }
 
-// Logika pemantauan aplikasi Native dengan sistem WHITELIST (Hanya menampilkan yang ada di daftar)
+// Logika pemantauan aplikasi Native dengan sistem WHITELIST ketat
 async function scanNativeServices() {
     const stdout = await runCommand('sudo ss -tulpn | grep LISTEN');
     if (!stdout) return [];
@@ -44,12 +44,10 @@ async function scanNativeServices() {
     const lines = stdout.split('\n');
     const servicesMap = new Map();
 
-    // =============== DAFTAR WHITELIST APLIKASI UTAMA ===============
-    // Tambahkan atau sesuaikan nama proses/aplikasi asli yang HANYA boleh muncul di dashboard Anda.
-    // Ditulis dalam huruf kecil (lowercase) agar pencocokannya akurat.
-    const allowedApps = ['bt', 'aapanel', 'node', 'casaos']; 
-    // Keterangan: 'bt' biasanya adalah nama proses/service utama milik aaPanel di core Linux.
-    // ===============================================================
+    // =============== DAFTAR WHITELIST UTAMA ===============
+    // Hanya proses dengan nama di bawah ini yang diizinkan muncul
+    const allowedApps = ['bt', 'aapanel', 'node', 'python', 'casaos']; 
+    // ======================================================
 
     lines.forEach(line => {
         const portMatch = line.match(/:([0-9]+)\s+/);
@@ -59,7 +57,10 @@ async function scanNativeServices() {
             const port = portMatch[1];
             let procName = processMatch[1];
 
-            // Jika nama proses tidak ada di dalam daftar whitelist, langsung dilewati (tidak ditampilkan)
+            // Abaikan proxy internal docker agar tidak duplikat dengan kontainer
+            if (procName === 'docker-proxy') return;
+
+            // Jika nama proses tidak ada di whitelist, abaikan langsung
             if (!allowedApps.includes(procName.toLowerCase())) {
                 return;
             }
@@ -73,7 +74,7 @@ async function scanNativeServices() {
             } else {
                 servicesMap.set(procName, {
                     id: `PID-${Math.floor(Math.random() * 9000) + 1000}`,
-                    name: procName.toUpperCase(),
+                    name: procName.toUpperCase() === 'BT' ? 'aaPanel' : procName.toUpperCase(),
                     image: "Native Linux Service",
                     ports: [port],
                     state: "running",
@@ -139,16 +140,16 @@ app.get('/api/services', async (req, res) => {
     let systemServices = [];
     const dockerServices = [];
 
-    // 1. Logika Deteksi Mandiri aaPanel via port.pl (Tetap dipertahankan paling atas)
+    // 1. Ambil data aaPanel (Port 82 / otomatis via port.pl)
     const checkAapanel = () => new Promise((resolve) => {
         const portFile = '/www/server/panel/data/port.pl';
         fs.readFile(portFile, 'utf8', (err, data) => {
             if (err) {
-                exec("ss -tuln | grep -E '8888|81|82'", (err2, stdout) => {
+                exec("ss -tuln | grep -E '82|8888'", (err2, stdout) => {
                     systemServices.push({
                         id: "SYS-01", name: "aaPanel", image: "Native OS",
                         state: stdout ? "running" : "stopped",
-                        ports: stdout ? "82" : "N/A", type: "system"
+                        ports: "82", type: "system"
                     });
                     resolve();
                 });
@@ -166,21 +167,33 @@ app.get('/api/services', async (req, res) => {
         });
     });
 
-    try {
-        // Ambil aaPanel utama
-        await checkAapanel();
+    // 2. Ambil data CasaOS secara khusus (Port 81)
+    const checkCasaOS = () => new Promise((resolve) => {
+        exec("ss -tuln | grep :81", (err, stdout) => {
+            systemServices.push({
+                id: "SYS-02", name: "CasaOS", image: "Native OS",
+                state: stdout ? "running" : "stopped",
+                ports: "81", type: "system"
+            });
+            resolve();
+        });
+    });
 
-        // 2. Jalankan scanner aplikasi native lain yang sudah difilter ketat lewat whitelist
+    try {
+        // Jalankan deteksi manual untuk aaPanel dan CasaOS agar posisinya rapi di atas
+        await checkAapanel();
+        await checkCasaOS();
+
+        // 3. Jalankan scanner otomatis aplikasi native tambahan yang lolos whitelist (jika ada)
         const autoNative = await scanNativeServices();
-        
         autoNative.forEach(service => {
-            // Hindari duplikasi jika aaPanel terdeteksi kembali dari pencarian otomatis port terbuka
-            if (service.name !== 'AAPANEL' && service.name !== 'BT') {
+            // Hindari duplikasi karena aaPanel dan CasaOS sudah dibuatkan barisnya secara manual di atas
+            if (!['AAPANEL', 'BT', 'CASAOS'].includes(service.name)) {
                 systemServices.push(service);
             }
         });
 
-        // 3. Ambil data kontainer Docker (Id dan Image tetap dipertahankan)
+        // 4. Ambil data kontainer Docker (Id dan Image tetap dipertahankan)
         const containers = await docker.listContainers({ all: true });
         containers.forEach(c => {
             const portMap = c.Ports.map(p => p.PublicPort ? `${p.PublicPort}:${p.PrivatePort}` : p.PrivatePort);
