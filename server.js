@@ -70,13 +70,25 @@ app.get('/api/services', async (req, res) => {
 
     // Deteksi aaPanel
     const checkAapanel = () => new Promise((resolve) => {
-        exec('ss -tuln | grep :81', (err, stdout) => {
-            systemServices.push({
-                id: "SYS-01", name: "aaPanel", image: "Native OS",
-                state: stdout.includes(':81') ? "running" : "stopped",
-                ports: "81", type: "system"
+        exec("ps aux | grep 'aapanel' | grep -v 'grep'", (err, stdout) => {
+         if (stdout.length > 0) {
+            exec("ss -tuln | grep -i 'python' | awk '{print $5}' | cut -d: -f2", (err2, stdout2) => {
+                const port = stdout2.trim() || "82"; // Default ke 82 jika ss tidak mendeteksi   
+                systemServices.push({
+                    id: "SYS-01", name: "aaPanel", image: "Native OS",
+                    state: "running",
+                    ports: port, type: "system"
+                });
+                resolve();
             });
-            resolve();
+            } else {
+                systemServices.push({
+                    id: "SYS-01", name: "aaPanel", image: "Native OS",
+                    state: "stopped",
+                    ports: "N/A", type: "system"
+                });
+                resolve();
+            }
         });
     });
 
