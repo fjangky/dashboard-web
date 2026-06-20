@@ -364,18 +364,26 @@ async function fetchWeather() {
     const locationEl = document.getElementById('location');
     const tempEl = document.getElementById('temp');
     if (!locationEl || !tempEl) return;
+    
     try {
         const ipRes = await fetch('https://ipapi.co/json/');
         const ipData = await ipRes.json();
         const city = ipData.city || "Jakarta";
         locationEl.innerText = city;
 
+        // Gunakan parameter ?format=%t untuk meminta hanya suhu, 
+        // dan User-Agent 'curl' agar wttr.in tidak mengirimkan desain terminal yang panjang.
         const weatherRes = await fetch(`https://wttr.in/${city}?format=%t`, {
             headers: { 'User-Agent': 'curl/7.64.1' }
         });
-        const temp = await weatherRes.text();
-        // Bersihkan hasil dari karakter non-angka/derajat
-        tempEl.innerText = temp.replace(/[^0-9°C-]/g, '') || "--";
+        
+        const rawText = await weatherRes.text();
+        
+        // REGEX PENTING: Membersihkan semua karakter kecuali angka, derajat, minus, dan C.
+        // Ini akan menghilangkan semua "sampah" teks yang muncul di layar Anda sekarang.
+        const cleanTemp = rawText.replace(/[^0-9°C-]/g, '');
+        
+        tempEl.innerText = cleanTemp || "--";
     } catch (err) {
         console.error("Gagal memuat cuaca:", err);
         locationEl.innerText = "N/A";
