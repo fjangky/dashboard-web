@@ -41,7 +41,6 @@
         .icon-sys-header { color: #38bdf8; }
         .icon-docker-header { color: #2563eb; }
 
-        /* --- PERBAIKAN UTAMA: Layout Grid untuk 3 Elemen di Bawah --- */
         .services-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; width: 100%; }
         .file-manager-wrapper { grid-column: span 2; margin-top: 10px; background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; }
 
@@ -136,8 +135,14 @@
             .monitor-header { gap: 10px; }
             .monitor-header h2 { flex-shrink: 1; font-size: 13px; }
             
+            /* Sembunyikan Teks Tombol Docker Bersihkan */
             #btn-purge { padding: 8px 10px; font-size: 0; flex-shrink: 0; }
             #btn-purge i { font-size: 14px; margin: 0; }
+
+            /* PERBAIKAN: Sembunyikan Teks Tombol Buka Tab Baru di File Manager */
+            #btn-open-tab { padding: 8px 10px; font-size: 0 !important; flex-shrink: 0; }
+            #btn-open-tab i { font-size: 14px; margin: 0; }
+            #btn-open-tab span { display: none; }
 
             .server-blade { padding: 12px; flex-wrap: wrap; gap: 8px; }
             .blade-left { width: 100%; }
@@ -150,7 +155,7 @@
             .toggle-group { font-size: 13px; }
 
             .file-manager-wrapper { padding: 16px; }
-            .iframe-container { height: 350px; } /* Memperkecil tinggi iframe di mobile agar pas */
+            .iframe-container { height: 350px; }
         }
     </style>
 </head>
@@ -196,8 +201,8 @@
         <div class="file-manager-wrapper">
             <div class="file-manager-header">
                 <h2><i class="fa-solid fa-folder-open" style="color: #f59e0b;"></i> File Manager</h2>
-                <a href="http://192.168.18.188:8080" target="_blank" class="btn settings-btn" style="padding: 6px 12px; font-size: 11px;">
-                    <i class="fa-solid fa-up-right-from-square"></i> Buka Tab Baru
+                <a href="http://192.168.18.188:8080" target="_blank" class="btn settings-btn" id="btn-open-tab" style="padding: 6px 12px; font-size: 11px;">
+                    <i class="fa-solid fa-up-right-from-square"></i> <span>Buka Tab Baru</span>
                 </a>
             </div>
             <div class="iframe-container">
