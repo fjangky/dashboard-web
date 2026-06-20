@@ -2,6 +2,7 @@ const ctx = document.getElementById('cpuChart').getContext('2d');
 let maxChartPoints = 20;
 let currentLang = 'id';
 
+// KUNCI SUKSES: Kamus Multi-Bahasa yang Sudah Disinkronkan Sempurna dengan HTML
 const dictionary = {
     id: {
         cockpitBtn: '<i class="fa-solid fa-gear"></i> Pengaturan Sistem',
@@ -39,8 +40,8 @@ const dictionary = {
     en: {
         cockpitBtn: '<i class="fa-solid fa-gear"></i> System Settings',
         chartTitle: '<i class="fa-solid fa-chart-line"></i> Real-Time Workload Stream',
-        lblCpu: 'CPU Core Load',
-        lblRam: 'RAM Utilization',
+        lblCpu: 'CPU Load',
+        lblRam: 'RAM Usage',
         lblUptime: 'System Uptime',
         lblTemp: 'Device Temperature',
         rackTitle: '<i class="fa-solid fa-server"></i> Application Services List ($count Installed)',
@@ -169,7 +170,11 @@ async function fetchData() {
         document.getElementById('card-temp').style.display = data.config.showTemp ? 'flex' : 'none';
         
         maxChartPoints = data.config.chartPoints;
-        const currentCount = document.getElementById('container-count').innerText || 0;
+        
+        // Ambil jumlah kontainer saat ini dari DOM agar tidak reset ke 0 saat interval berjalan
+        const countMatch = document.getElementById('txt-rack-title').innerText.match(/\d+/);
+        const currentCount = countMatch ? countMatch[0] : 0;
+        
         applyLanguage(data.config.lang || 'id', currentCount);
 
         const time = new Date().toLocaleTimeString();
@@ -187,7 +192,6 @@ async function updateContainersMonitor() {
     try {
         const res = await fetch('/api/containers');
         const containers = await res.json();
-        document.getElementById('container-count').innerText = containers.length;
         
         const l = dictionary[currentLang];
         document.getElementById('txt-rack-title').innerHTML = l.rackTitle.replace('$count', containers.length);
@@ -205,6 +209,7 @@ async function updateContainersMonitor() {
             const ledClass = isRunning ? 'led-active' : 'led-offline';
             const statusColor = isRunning ? '#00ffcc' : '#f87171';
             const statusBg = isRunning ? 'rgba(0, 255, 204, 0.05)' : 'rgba(248, 113, 113, 0.05)';
+            const statusText = isRunning ? (currentLang === 'id' ? 'Aktif' : 'Active') : (currentLang === 'id' ? 'Berhenti' : 'Stopped');
             
             containerBox.innerHTML += `
                 <div class="server-blade">
@@ -217,7 +222,7 @@ async function updateContainersMonitor() {
                     </div>
                     <div class="blade-network"><i class="fa-solid fa-ethernet"></i> Port: ${c.ports}</div>
                     <div class="blade-status-text" style="color: ${statusColor}; background: ${statusBg};">
-                        ${isRunning ? 'Aktif' : 'Berhenti'}
+                        ${statusText}
                     </div>
                 </div>`;
         });
@@ -288,6 +293,7 @@ document.getElementById('settingsForm').addEventListener('submit', async (e) => 
     await fetch('/api/settings/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(configData) });
     toggleSettingsModal(false);
     fetchData();
+    setTimeout(updateContainersMonitor, 500);
 });
 
 setInterval(fetchData, 2000);
